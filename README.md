@@ -151,13 +151,20 @@ AB|CE		(((exp(-t_{3}-t_{20})/3)*r_{2}+(exp(-t_{3}-t_{19}-t_{20})/3)*(1
 .
 .
 .
-
 ```
 ### Creating Macaulay2 and Matlab input file
 ```@julia
-julia> using Pkg
-julia> Pkg.add("PhyNEST")
+julia> julia> network_expectedCF(ik1,savecsv=true,symbolic=true,macaulay=true,matlab=true)
 ```
+
+```@julia
+julia> network_expectedCF(ik1,savecsv=true,symbolic=false,macaulay=true,matlab=true)
+ERROR: symbolic must be set to true.
+Stacktrace:
+ [1] error(s::String)
+   @ Base ./error.jl:33
+```
+
 ### Visualizing network with parameter names
 
 ## Citation
