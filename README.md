@@ -166,6 +166,39 @@ Stacktrace:
 ```
 
 ### Visualizing network with parameter names
+```@julia
+julia> el=makeEdgeLabel(ik1)
+20×2 DataFrame
+ Row │ number   label
+     │ Integer  String
+─────┼─────────────────
+   1 │       1  t_{1}
+   2 │       2  t_{2}
+   3 │       3  t_{3}
+   4 │       4  t_{4}
+   5 │       5  t_{5}
+   6 │       6  t_{6}
+   7 │       7  t_{7}
+   8 │       8  t_{8}
+   9 │       9  t_{9}
+  10 │      10  t_{10}
+  11 │      11  t_{11}
+  12 │      12  t_{12}
+  13 │      13  t_{13}
+  14 │      14  t_{14}
+  15 │      15  t_{15}
+  16 │      16  t_{16}
+  17 │      17  t_{17}
+  18 │      18  t_{18}
+  19 │      19  t_{19}
+  20 │      20  t_{20}
+```
+
+```@julia  
+julia> using PhyloPlots
+julia> plot(ik1,edgelabel=elabels)
+```
+![Alt text](example/edgelabeled-ik1.png)
 
 
 ## Citation
