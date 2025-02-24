@@ -11,4 +11,4 @@
 
 ### Visualizing network with parameter names
 
-ß
+## Citation
