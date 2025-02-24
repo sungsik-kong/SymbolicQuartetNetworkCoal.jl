@@ -154,7 +154,7 @@ AB|CE		(((exp(-t_{3}-t_{20})/3)*r_{2}+(exp(-t_{3}-t_{19}-t_{20})/3)*(1
 ```
 ### Creating Macaulay2 and Matlab input file
 ```@julia
-julia> julia> network_expectedCF(ik1,savecsv=true,symbolic=true,macaulay=true,matlab=true)
+julia> network_expectedCF(ik1,savecsv=true,symbolic=true,macaulay=true,matlab=true)
 ```
 
 ```@julia
@@ -166,5 +166,6 @@ Stacktrace:
 ```
 
 ### Visualizing network with parameter names
+
 
 ## Citation
