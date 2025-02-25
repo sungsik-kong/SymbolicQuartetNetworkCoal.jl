@@ -15,6 +15,7 @@ module SymbolicQuartetNetworkCoal
     const PN = PhyloNetworks
 
     export
+    aloha,
     readTopologyrand,
     network_expectedCF,
     makeEdgeLabel
