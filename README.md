@@ -7,15 +7,15 @@ Aloha!
 ## Installation
 
 Install with the Julia package manager [Pkg](https://pkgdocs.julialang.org/), just like any other registered Julia package (**Below will be on once the package registered. Is you see this, it is not registered yet.**):
-```jl
+```@julia
 pkg> add SymbolicQuartetNetworkCoal  # Press ']' to enter the Pkg REPL mode.
 ```
 or
-```jl
+```@julia
 julia> using Pkg; Pkg.add("SymbolicQuartetNetworkCoal")
 ```
 To make sure the package is installed correctly, try the following:
-```jl
+```@julia
 julia> using SymbolicQuartetNetworkCoal
 
 julia> aloha()
@@ -49,7 +49,7 @@ The function `readTopologyrand()` topology imports a (extended) Newick string or
 
 Briefly, n^th edge that appears in the Newick topology will have the length of n plus a random value drawn from the uniform distribution of U(0,1). The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is one. The inheritance probability is drawn from the uniform distribution of U(0,1).
 
-```jl
+```@julia
 julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
 PhyloNetworks.HybridNetwork, Rooted Network
 20 edges
