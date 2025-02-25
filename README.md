@@ -43,8 +43,14 @@ You should be able to see the Shaka!
 
 
 ## Main functions
-### Parametrized topology with random values
-```@julia
+### Full parametrized topology with random values
+
+The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. In results in a non-ultrametric topology. Briefly, n$^th$
+
+function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integer)
+
+
+```jl
 julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
 PhyloNetworks.HybridNetwork, Rooted Network
 20 edges
