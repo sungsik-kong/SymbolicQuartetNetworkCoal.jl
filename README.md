@@ -6,9 +6,7 @@ Aloha!
 
 ## Installation
 
-Install with the Julia package manager [Pkg](https://pkgdocs.julialang.org/), just like any other registered Julia package:
-
-**Below will be on once the package registered.**
+Install with the Julia package manager [Pkg](https://pkgdocs.julialang.org/), just like any other registered Julia package (**Below will be on once the package registered.**):
 ```jl
 pkg> add SymbolicQuartetNetworkCoal  # Press ']' to enter the Pkg REPL mode.
 ```
