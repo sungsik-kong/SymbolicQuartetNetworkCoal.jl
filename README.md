@@ -55,15 +55,14 @@ PhyloNetworks.HybridNetwork, Rooted Network
 tip labels: C, A, G, H, ...
 ((C:1.447,A:2.341):3.512,(((G:4.325,H:5.036):6.06,(((E:7.226,F:8.802):9.386)#H2:10.989::0.509)#H1:11.467::0.889):12.585,((#H2:13.222::0.491,(B:14.527,D:15.871):16.692):17.377,#H1:18.815::0.111):19.026):20.727);
 
-
 julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));",scaleparameter=0.1)
 PhyloNetworks.HybridNetwork, Rooted Network
 20 edges
 19 nodes: 8 tips, 2 hybrid nodes, 9 internal tree nodes.
 tip labels: C, A, G, H, ...
 ((C:0.164,A:0.282):0.307,(((G:0.415,H:0.561):0.657,(((E:0.713,F:0.89):0.944)#H2:1.046::0.634)#H1:1.102::0.813):1.23,((#H2:1.393::0.366,(B:1.435,D:1.595):1.63):1.767,#H1:1.83::0.187):1.995):2.023);
-
 ```
+Note the edge lengths of the bottom network is roughly 1/10 of the top network since we set `scaleparameter=0.1`.
 ### Obtain formulas for CF computation for each quartet
 #### Numerical formulas
 ```@julia
