@@ -11,7 +11,7 @@
         
         #true vs numeric
         ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
-        Q0,T0=SymbolicQuartetNetworkCoal.network_expectedCF(ik1,filename="temp")
+        Q0,T0=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(ik1,filename="temp")
 
         #true res stored in df_true
         for nthq in 1:binomial(length(T0),4)
@@ -21,14 +21,14 @@
         end
 
         #numeric res stored in df_numeric
-        Q1,T1=SymbolicQuartetNetworkCoal.network_expectedCF(ik1,symbolic=false,savecsv=true,filename="temp-num",inheritancecorrelation=ih)
+        Q1,T1=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(ik1,symbolic=false,savecsv=true,filename="temp-num",inheritancecorrelation=ih)
         df_num=CSV.read("temp-num.csv",DataFrame,header=false) #make sure CSV file is reliable
         for nthrow in 1:nrow(df_num) push!(df_numeric,(df_num[nthrow,1],df_num[nthrow,2],eval(Meta.parse(df_num[nthrow,2])))) end #compute numeric formula and record the value
 
         #symbolic res stored in df_symbolic
-        Q2,T2=SymbolicQuartetNetworkCoal.network_expectedCF(ik1,symbolic=true,savecsv=true,filename="temp-sym",inheritancecorrelation=ih)
+        Q2,T2=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(ik1,symbolic=true,savecsv=true,filename="temp-sym",inheritancecorrelation=ih)
         df_sym=CSV.read("temp-sym.csv",DataFrame,header=false)
-        dict=SymbolicQuartetNetworkCoal.dictionary(ik1,ih)
+        dict=SymbolicQuartetNetworkCoal.parameterDictionary(ik1,ih)
         revdict=Dict(value => key for (key, value) in dict)
         for nthrow in 1:nrow(df_sym)
             df_replace="$(df_sym[nthrow,2])"
@@ -51,7 +51,7 @@
         #generate nreps macaluay and matlab files one a same topoplogy but randomized parameters
         for i in 1:nreps
             ik1=readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
-            network_expectedCF(ik1,symbolic=true,savecsv=true,filename="temp-macaulay-matlab-$i",inheritancecorrelation=ih,macaulay=true,matlab=true)
+            QM,TM=network_expectedCF_formulas(ik1,symbolic=true,savecsv=true,filename="temp-macaulay-matlab-$i",inheritancecorrelation=ih,macaulay=true,matlab=true)
         end
         for i in 1:(nreps-1)
             for j in 2:nreps

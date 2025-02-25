@@ -41,7 +41,10 @@ julia> aloha()
 ```
 You should be able to see the Shaka! 
 
-
+## Input and output
+  - d
+  - d
+  
 ## Main functions
 ### Full parametrized topology with random values
 
@@ -66,7 +69,7 @@ tip labels: C, A, G, H, ...
 ```
 Note the edge lengths of the bottom network is roughly 1/10 of the top network since we set `scaleparameter=0.1`.
 
-### Formulas for quartet CFs
+### Formulas for expected quartet CFs
 #### Numerical formulas
 ```@julia
 julia> julia> network_expectedCF(ik1)

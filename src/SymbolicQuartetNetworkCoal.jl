@@ -17,7 +17,7 @@ module SymbolicQuartetNetworkCoal
     export
     aloha,
     readTopologyrand,
-    network_expectedCF,
+    network_expectedCF_formulas,
     makeEdgeLabel
     #plot_ntwk_with_Symbolic_Names,
 

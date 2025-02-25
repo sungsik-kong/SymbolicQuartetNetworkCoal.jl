@@ -84,12 +84,12 @@ function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integ
 end
 
 """
-    dictionary(net,inheritancecorrelation;convert=false)
+    parameterDictionary(net,inheritancecorrelation;convert=false)
 
     Creates a dictionary of parameter labels to values (edge lengths and inheritance probabilities) in a network.
     This dictionary is used to transform the parameter values into symbolic strings.
 """
-function dictionary(net,inheritancecorrelation;
+function parameterDictionary(net,inheritancecorrelation;
                     tauSymbol=""::String,gammaSymbol=""::String)
         dict=Dict()
         #dictionary for tau
@@ -168,7 +168,7 @@ function dictionary(net,inheritancecorrelation;
 """
 
 """
-function network_expectedCF(network::HybridNetwork; 
+function network_expectedCF_formulas(network::HybridNetwork; 
                             showprogressbar=false, 
                             inheritancecorrelation=0, 
                             filename="symbolicQNC-HFO-out"::AbstractString,     
@@ -211,7 +211,7 @@ function network_expectedCF(network::HybridNetwork;
     flush(logfile)
 
     #-----------topologies and dictionary-----------#
-    dict=dictionary(net,inheritancecorrelation)
+    dict=parameterDictionary(net,inheritancecorrelation)
     str="------------------------\n"
     str*="Topology:\n"
     str*="$(writeTopology(net,digits=dpoints))\n"
