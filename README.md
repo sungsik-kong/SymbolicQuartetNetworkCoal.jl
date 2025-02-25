@@ -47,9 +47,6 @@ You should be able to see the Shaka!
 
 The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. In results in a non-ultrametric topology. Briefly, n^th edge that appears in the Newick topology will have the length of n plus a random value between zero and one. The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is one. The inheritance probability is drawn from the uniform distribution of U(0,1).
 
-function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integer)
-
-
 ```jl
 julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
 PhyloNetworks.HybridNetwork, Rooted Network
