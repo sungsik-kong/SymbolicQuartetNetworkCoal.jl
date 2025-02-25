@@ -65,7 +65,8 @@ tip labels: C, A, G, H, ...
 ((C:0.164,A:0.282):0.307,(((G:0.415,H:0.561):0.657,(((E:0.713,F:0.89):0.944)#H2:1.046::0.634)#H1:1.102::0.813):1.23,((#H2:1.393::0.366,(B:1.435,D:1.595):1.63):1.767,#H1:1.83::0.187):1.995):2.023);
 ```
 Note the edge lengths of the bottom network is roughly 1/10 of the top network since we set `scaleparameter=0.1`.
-### Obtain formulas for CF computation for each quartet
+
+### Formulas for quartet CFs
 #### Numerical formulas
 ```@julia
 julia> julia> network_expectedCF(ik1)
