@@ -92,7 +92,6 @@ The function
 ```@julia
 julia> network_expectedCF_formulas(ik1,inheritancecorrelation=0)```
 
-```
 SymbolicQuartetNetworkCoal.jl log
 Timestamp: 2025-02-24T18:45:18.762
 ------------------------
