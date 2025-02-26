@@ -43,7 +43,7 @@ You should be able to see the Shaka!
 
 ## Input and output
   - **Input**: A network topology (with four or more taxa) written in extended Newick format, with or without parameters specified.
-  - **Output**: Numerical or symbolic formulas to compute the quartet concordance factors under the network multispecies coalescent for each quartet topology extracted from the input network.
+  - **Output**: Numerical or symbolic formulas to compute the quartet concordance factors (CFs) under the network multispecies coalescent for each quartet topology extracted from the input network.
   
 ## Main functions
 ### Full parametrized topology with random values
@@ -67,34 +67,30 @@ PhyloNetworks.HybridNetwork, Rooted Network
 tip labels: C, A, G, H, ...
 ((C:0.164,A:0.282):0.307,(((G:0.415,H:0.561):0.657,(((E:0.713,F:0.89):0.944)#H2:1.046::0.634)#H1:1.102::0.813):1.23,((#H2:1.393::0.366,(B:1.435,D:1.595):1.63):1.767,#H1:1.83::0.187):1.995):2.023);
 ```
-Note the edge lengths of the bottom network is roughly 1/10 of the top network since we set `scaleparameter=0.1`.
+Notice the edge lengths of the bottom network is roughly 1/10 of the top network since we set `scaleparameter=0.1`.
 
 ### Formulas for expected quartet CFs
+
+The function `network_expectedCF_formulas` is the core function that produces the quartet CFs for each quartet in the input topology. When this function is executed *only* with the network topology provided (i.e., without specifying any of the optional arguments), it performs the identical procedure as `network_expectedCF` function in `QuartetNetworkGoodnessFit`. The arguments that can be specified to perform the functions available in `SymbolicQuartetNetworkCoal` are:
+
+#### Mandatory argument
+  - Network topology written in Newick 
+
+#### Optional arguments
+  - `showprogressbar(=false [default])`
+  - `inheritancecorrelation(=0 [default])`
+  - `filename(=""symbolicQNC-HFO-out" [default])`
+  - `symbolic(=false [default])`
+  - `savecsv(=false [default])`
+  - `macaulay(=false [default])`
+  - `matlab(=false [default])`
+
 #### Numerical formulas
+
+The function 
+
 ```@julia
-julia> julia> network_expectedCF(ik1)
-(PhyloNetworks.QuartetT{StaticArraysCore.MVector{3, Float64}}[4-taxon set number 1; taxon numbers: 1,2,3,4
-data: [9.618622528537664e-35, 1.0, 9.618622528537664e-35], 4-taxon set number 2; taxon numbers: 1,2,3,5
-data: [9.321874190057184e-13, 0.9999999999981356, 9.321874190057184e-13], 4-taxon set number 3; taxon numbers: 1,2,4,5
-data: [3.0628420794597945e-8, 3.0628420794597945e-8, 0.9999999387431584], 4-taxon set number 4; taxon numbers: 1,3,4,5
-data: [0.9999999999981356, 9.321874190057184e-13, 9.321874190057184e-13], 4-taxon set number 5; taxon numbers: 2,3,4,5
-data: [3.0628420794597945e-8, 0.9999999387431584, 3.0628420794597945e-8], 4-taxon set number 6; taxon numbers: 1,2,3,6
-data: [9.321874190057184e-13, 0.9999999999981356, 9.321874190057184e-13], 4-taxon set number 7; taxon numbers: 1,2,4,6
-data: [3.0628420794597945e-8, 3.0628420794597945e-8, 0.9999999387431584], 4-taxon set number 8; taxon numbers: 1,3,4,6
-data: [0.9999999999981356, 9.321874190057184e-13, 9.321874190057184e-13], 4-taxon set number 9; taxon numbers: 2,3,4,6
-data: [3.0628420794597945e-8, 0.9999999387431584, 3.0628420794597945e-8], 4-taxon set number 10; taxon numbers: 1,2,5,6
-data: [0.9999782998462678, 1.0800076806077543e-5, 1.0800076806077543e-5]  …  4-taxon set number 61; taxon numbers: 3,4,7,8
-data: [0.9999999970451936, 1.4774031943872099e-9, 1.4774031943872099e-9], 4-taxon set number 62; taxon numbers: 1,5,7,8
-data: [0.9999499336595082, 2.503317024587204e-5, 2.503317024587204e-5], 4-taxon set number 63; taxon numbers: 2,5,7,8
-data: [0.9999499363732899, 2.5031813355072422e-5, 2.5031813355072422e-5], 4-taxon set number 64; taxon numbers: 3,5,7,8
-data: [0.9999499336595082, 2.503317024587204e-5, 2.503317024587204e-5], 4-taxon set number 65; taxon numbers: 4,5,7,8
-data: [0.9999499363732899, 2.5031813355072422e-5, 2.5031813355072422e-5], 4-taxon set number 66; taxon numbers: 1,6,7,8
-data: [0.9999499336595082, 2.503317024587204e-5, 2.503317024587204e-5], 4-taxon set number 67; taxon numbers: 2,6,7,8
-data: [0.9999499363732899, 2.5031813355072422e-5, 2.5031813355072422e-5], 4-taxon set number 68; taxon numbers: 3,6,7,8
-data: [0.9999499336595082, 2.503317024587204e-5, 2.503317024587204e-5], 4-taxon set number 69; taxon numbers: 4,6,7,8
-data: [0.9999499363732899, 2.5031813355072422e-5, 2.5031813355072422e-5], 4-taxon set number 70; taxon numbers: 5,6,7,8
-data: [0.9999998894163947, 5.291742700465496e-9, 5.291742700465496e-9]], ["A", "B", "C", "D", "E", "F", "G", "H"])
-```
+julia> network_expectedCF_formulas(ik1,inheritancecorrelation=0)```
 
 ```
 SymbolicQuartetNetworkCoal.jl log
