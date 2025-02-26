@@ -74,7 +74,7 @@ Notice the edge lengths of the bottom network is roughly 1/10 of the top network
 The function `network_expectedCF_formulas` is the core function that produces the quartet CFs for each quartet in the input topology. When this function is executed *only* with the network topology provided (i.e., without specifying any of the optional arguments), it performs the identical procedure as `network_expectedCF` function in `QuartetNetworkGoodnessFit`. The arguments that can be specified to perform the functions available in `SymbolicQuartetNetworkCoal` are:
 
 - Mandatory argument
-  -- Network topology written in Newick 
+  - Network topology written in Newick 
 
 - Optional arguments
   - `showprogressbar(=false [default])`
