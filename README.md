@@ -48,7 +48,7 @@ You should be able to see the Shaka!
 ## Main functions
 ### Full parametrized topology with random values
 
-The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. It results in a non-ultrametric topology. 
+The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. It results in a non-ultrametric topology. This function is useful when the parameters in the given topology is not or partially available, as we need fully parametrized topologies to obtain the set of formulas.
 
 Briefly, n^th edge that appears in the Newick topology will have the length of n plus a random value drawn from the uniform distribution of U(0,1). The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is one. The inheritance probability is drawn from the uniform distribution of U(0,1).
 
