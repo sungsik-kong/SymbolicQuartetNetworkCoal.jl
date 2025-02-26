@@ -42,8 +42,8 @@ julia> aloha()
 You should be able to see the Shaka! 
 
 ## Input and output
-  - d
-  - d
+  - Input: A network topology in extended Newick format (with or without parameters specified).
+  - Output: Numerical or symbolic formulas to compute quartet concordance factors for each quartet topology extracted from the input network under the network multispecies coalescent.
   
 ## Main functions
 ### Full parametrized topology with random values
