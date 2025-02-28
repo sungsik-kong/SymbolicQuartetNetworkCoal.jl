@@ -176,6 +176,7 @@ function network_expectedCF_formulas(network::HybridNetwork;
                             savecsv=false::Bool,
                             macaulay=false::Bool,
                             matlab=false::Bool,
+                            multigraded=false::Bool
                             )
     
     #----------filename and logging----------#
@@ -289,7 +290,7 @@ function network_expectedCF_formulas(network::HybridNetwork;
     
     #macaulay output
     numCFs=size(df)[1]
-    if(macaulay||matlab) 
+    if(symbolic) 
         dataframe=deepcopy(df)
         params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
     end
@@ -336,6 +337,32 @@ function network_expectedCF_formulas(network::HybridNetwork;
             for i in 1:numCFs-1 str=str*"C_$i " end
             str=str*"C_$numCFs]\n"
             str=str*"\n% Compute dimension\nCoalDim(F,V)"
+        write(file, str)
+        end
+    end
+
+    if(multigraded)
+        open("$filename.im.m2.txt", "w") do file
+        str="needsPackage \"MultigradedImplicitization\"\n"
+        str*="R = QQ["
+        for par in params str=str*par*"," end
+        str*="T]\n"
+        str*="S = QQ["
+        str=str*"C_0..C_$numCFs]\n"
+        str=str*"im = {\n"
+        i=1
+        while i<numCFs
+            str=str*"$(dataframe[i,2]),\n"
+            i+=1
+        end
+        str=str*"$(dataframe[numCFs,2])};\n"
+
+        str=str*"im = {T} | apply(im, f -> f * T);\n"
+        str=str*"phi = map(R, S, im)\n"
+        str=str*"d=1\n"
+        str=str*"I = time componentsOfKernel(d, phi)\n"
+        str=str*"L = flatten values I"
+
         write(file, str)
         end
     end
