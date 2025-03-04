@@ -68,7 +68,7 @@ function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integ
         nthvisit=1
         for e in net.edge
             if e.hybrid
-                child=PhyloNetworks.getchild(e)
+                child=PhyloNetworks.getChild(e)
                 if child.number==reticulatenodeindex[nthgamma]
                     if nthvisit==1 e.gamma=round(gammavec[nthgamma],digits=dpoints)
                         nthvisit+=1
@@ -95,7 +95,7 @@ function parameterDictionary(net,inheritancecorrelation;
         #dictionary for tau
         numEdges=length(net.edge)
         allNetEdges=collect(1:numEdges)
-        termedgenum=Int[e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
+        termedgenum=Int[e.number for e in net.edge if PhyloNetworks.getChild(e).leaf]
         maximumNumberEdgesMerged=6 #future todo
         
         for mergeRange in 1:maximumNumberEdgesMerged
@@ -124,7 +124,7 @@ function parameterDictionary(net,inheritancecorrelation;
             hybnode=hybnodenum[j]
             i=1
             for e in net.edge
-                child=PhyloNetworks.getchild(e)
+                child=PhyloNetworks.getChild(e)
                 if child.number==hybnode
                     e.gamma=round(e.gamma,digits=dpoints)
                     if i==1 dict[e.gamma]="r_{$j}"
@@ -493,7 +493,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         funneldescendants = union([PN.descendants(e) for e in funneledge]...)
         ndes = length(funneldescendants)
         #n2 = (ispolytomy ? hyb : getchild(funneledge[1]))
-        n2 = (ispolytomy ? hyb : PhyloNetworks.getchild(funneledge[1]))
+        n2 = (ispolytomy ? hyb : PhyloNetworks.getChild(funneledge[1]))
         ndes > 2 && n2.leaf && error("2+ descendants below the lowest hybrid, yet n2 is a leaf. taxa: $(fourtaxa)")
     end
     if ndes > 2 # simple formula for qCF: find cut edge and its length
@@ -502,7 +502,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         cutpool = (net.numHybrids == 0 ? net.edge :
                     [e for e in n2.edge if PN.getparent(e) === n2])
         #filter!(e -> !getchild(e).leaf, cutpool)
-        filter!(e -> !PhyloNetworks.getchild(e).leaf, cutpool)
+        filter!(e -> !PhyloNetworks.getChild(e).leaf, cutpool)
         net.numHybrids > 0 || length(cutpool) <= 1 ||
             error("2+ cut edges, yet 4-taxon tree, degree-3 root and no degree-2 nodes. taxa: $(fourtaxa)")
         sistertofirst = 2    # arbitrarily correct if 3-way polytomy (no cut edge)
@@ -545,7 +545,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     # by now, there are 1 or 2 taxa below the lowest hybrid
     qCF = MVector{3,Float64}(0.0,0.0,0.0) # mutated later
     #parenthedge = [e for e in hyb.edge if getchild(e) === hyb]
-    parenthedge = [e for e in hyb.edge if PhyloNetworks.getchild(e) === hyb]
+    parenthedge = [e for e in hyb.edge if PhyloNetworks.getChild(e) === hyb]
     all(h.hybrid for h in parenthedge) || error("hybrid $(hyb.number) has a parent edge that's a tree edge")
     parenthnumber = [p.number for p in parenthedge]
     nhe = length(parenthedge)
@@ -620,7 +620,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     childedge = [e for e in hyb.edge if PN.getparent(e) === hyb]
     length(childedge) == 2 ||
       error("2-taxon subtree, but not 2 child edges after shrinking the cut edge.")
-    all(PN.getchild(e).leaf for e in childedge) ||
+    all(PN.getChild(e).leaf for e in childedge) ||
       error("2-taxon subtree, cut-edge shrunk, but the 2 edges aren't both external")
     childnumber = [e.number for e in childedge]
     for i in 1:nhe
@@ -647,7 +647,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             pej_index = findfirst(e -> e.number == parenthnumber[j], simplernet.edge)
             pej = simplernet.edge[pej_index]
             pn = PN.getparent(pej)
-            hn = PN.getchild(pej) # hyb node, but in simplernet
+            hn = PN.getChild(pej) # hyb node, but in simplernet
             ce2_index = findfirst(e -> e.number == childnumber[2], simplernet.edge)
             ce2 = simplernet.edge[ce2_index]
             PN.removeEdge!(hn,ce2)
@@ -786,7 +786,7 @@ end
 function disjointedges(net,edgeCombination)
     uvSet=[]
     disjoint=false
-    for e in edgeCombination push!(uvSet,[(PhyloNetworks.getparent(net.edge[e])).number,(PhyloNetworks.getchild(net.edge[e])).number]) end
+    for e in edgeCombination push!(uvSet,[(PhyloNetworks.getparent(net.edge[e])).number,(PhyloNetworks.getChild(net.edge[e])).number]) end
     println(uvSet)
     for uvCurrent in uvSet
         println("1")
