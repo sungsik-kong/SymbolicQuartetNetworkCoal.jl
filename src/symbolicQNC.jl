@@ -51,7 +51,7 @@ function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integ
     #--------generaete arbitrary inheritance probabilities--------#
     #----preambles----#
     reticulatenodeindex=Int[]
-    nreticulate=net.numHybrids
+    nreticulate=net.numhybrids
     gammavec=zeros(nreticulate)
     #getting hybrid node index numbers
     for n in net.node n.hybrid && push!(reticulatenodeindex,n.number) end
@@ -120,7 +120,7 @@ function parameterDictionary(net,inheritancecorrelation;
             if n.hybrid push!(hybnodenum,n.number) end
         end
     
-        for j in 1:net.numHybrids
+        for j in 1:net.numhybrids
             hybnode=hybnodenum[j]
             i=1
             for e in net.edge
@@ -483,7 +483,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         end
     end
     ndes = 4 # number of taxa descendant from lowest hybrid node
-    if net.numHybrids > 0
+    if net.numhybrids > 0
         preorder!(net)
         # find a lowest hybrid node and # of taxa below it
         hyb = net.nodes_changed[findlast(n -> n.hybrid, net.nodes_changed)]
@@ -499,11 +499,11 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     if ndes > 2 # simple formula for qCF: find cut edge and its length
         # inheritance correlation has no impact
         # pool of cut edges below. contains NO external edge, bc n2 not leaf (if reticulation), nice tree ow
-        cutpool = (net.numHybrids == 0 ? net.edge :
+        cutpool = (net.numhybrids == 0 ? net.edge :
                     [e for e in n2.edge if PN.getparent(e) === n2])
         #filter!(e -> !getchild(e).leaf, cutpool)
         filter!(e -> !PhyloNetworks.getchild(e).leaf, cutpool)
-        net.numHybrids > 0 || length(cutpool) <= 1 ||
+        net.numhybrids > 0 || length(cutpool) <= 1 ||
             error("2+ cut edges, yet 4-taxon tree, degree-3 root and no degree-2 nodes. taxa: $(fourtaxa)")
         sistertofirst = 2    # arbitrarily correct if 3-way polytomy (no cut edge)
         internallength = 0.0 # correct if polytomy
@@ -782,7 +782,7 @@ end
 
 
 #to be updated 
-
+#check if the selected edges are disjoint or not
 function disjointedges(net,edgeCombination)
     uvSet=[]
     disjoint=false
@@ -809,3 +809,5 @@ function disjointedges(net,edgeCombination)
     end
     return disjoint        
 end
+
+#max number of composite edges
