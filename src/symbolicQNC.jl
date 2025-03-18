@@ -768,10 +768,15 @@ end
 """
 
 """
-function makeEdgeLabel(net)
+function makeEdgeLabel(net; showTerminalEdgeLabels=false)
     df=DataFrame(number=Integer[],label=String[])
     for e in net.edge
-        push!(df,(e.number,"t_{$(e.number)}"))
+        child=PN.getchild(e)
+        if(child.leaf)
+            continue
+        else
+            push!(df,(e.number,"t_{$(e.number)}"))
+        end
     end
     return df
 end
