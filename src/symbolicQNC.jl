@@ -772,7 +772,7 @@ function makeEdgeLabel(net; showTerminalEdgeLabels=false)
     df=DataFrame(number=Integer[],label=String[])
     for e in net.edge
         child=PN.getchild(e)
-        if(child.leaf)
+        if(child.leaf) && showTerminalEdgeLabels
             continue
         else
             push!(df,(e.number,"t_{$(e.number)}"))
