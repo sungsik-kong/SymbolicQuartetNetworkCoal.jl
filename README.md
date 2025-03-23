@@ -6,7 +6,7 @@ Aloha!
 
 ## Installation
 
-Install with the Julia package manager [Pkg](https://pkgdocs.julialang.org/), just like any other registered Julia package (**Below will be on once the package registered. Is you see this, it is not registered yet.**):
+Install with the Julia package manager [Pkg](https://pkgdocs.julialang.org/), just like any other registered Julia package (**Below will be on once the package is registered. If you see this, then it is not registered yet.**):
 ```@julia
 pkg> add SymbolicQuartetNetworkCoal  # Press ']' to enter the Pkg REPL mode.
 ```
@@ -48,9 +48,9 @@ You should be able to see the Shaka!
 ## Main functions
 ### Full parametrized topology with random values
 
-The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. It results in a non-ultrametric topology. This function is useful when the parameters in the given topology is not or partially available, as we need fully parametrized topologies to obtain the set of formulas.
+The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. It results in a non-ultrametric topology. This function is useful when the parameters in the given topology are not or partially available, as we need fully parametrized topologies to obtain the set of formulas.
 
-Briefly, n^th edge that appears in the Newick topology will have the length of n plus a random value drawn from the uniform distribution of U(0,1). The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is one. The inheritance probability is drawn from the uniform distribution of U(0,1).
+Briefly, the n^th edge that appears in the Newick topology will have the length of n plus a random value drawn from the uniform distribution of U(0,1). The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is `1`. The inheritance probability is drawn from the uniform distribution of U(0,1).
 
 ```@julia
 julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
@@ -67,7 +67,7 @@ PhyloNetworks.HybridNetwork, Rooted Network
 tip labels: C, A, G, H, ...
 ((C:0.164,A:0.282):0.307,(((G:0.415,H:0.561):0.657,(((E:0.713,F:0.89):0.944)#H2:1.046::0.634)#H1:1.102::0.813):1.23,((#H2:1.393::0.366,(B:1.435,D:1.595):1.63):1.767,#H1:1.83::0.187):1.995):2.023);
 ```
-Notice the edge lengths of the bottom network is roughly 1/10 of the top network since we set `scaleparameter=0.1`.
+Notice the edge lengths of the bottom network are roughly 1/10 of the top network since we set `scaleparameter=0.1`.
 
 ### Formulas for expected quartet CFs
 
