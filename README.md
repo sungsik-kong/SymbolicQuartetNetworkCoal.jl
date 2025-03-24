@@ -205,16 +205,15 @@ AB|CE		(((exp(-t_{3}-t_{20})/3)*r_{2}+(exp(-t_{3}-t_{19}-t_{20})/3)*(1
 .
 ```
 ### Creating Macaulay2 and Matlab input file
+To use algebraic methods to study the coalescent model for a given network, we can think of the quartet CFs as a parametrization. The Zariski closure of the image of this parametrization is an *algebraic variety*. Such varieties are studied in algebraic statistics.
+- setting the option `macaulay=true` in the function `network_expectedCF` produces a text file with Macaulay2 script to compute the ideal associated with the CF parametrization and its dimension.
 ```@julia
-julia> network_expectedCF(ik1,savecsv=true,symbolic=true,macaulay=true,matlab=true)
+julia> network_expectedCF(ik1,savecsv=true,symbolic=true,macaulay=true)
 ```
-
+Sometimes, it may be challenging to compute the ideal of our CF parametrization, and we may only need information about the variety (like the dimension), which can be obtained without computing the elimination ideal of the CF parametrization.
+- setting the option `matlab=true` in the function `network_expectedCF` produces a text file with MATLAB script to compute the dimension of the variety associated with the CF parametrization. This computation is done numerically using the methods in the paper [*Witness sets of projections*](https://www3.nd.edu/~jhauenst/preprints/hsProjection.pdf) by Jonathan D. Hauenstein and Andrew J. Sommese.
 ```@julia
-julia> network_expectedCF(ik1,savecsv=true,symbolic=false,macaulay=true,matlab=true)
-ERROR: symbolic must be set to true.
-Stacktrace:
- [1] error(s::String)
-   @ Base ./error.jl:33
+julia> network_expectedCF(ik1,savecsv=true,symbolic=false, matlab=true)
 ```
 
 ### Visualizing network with parameter names
