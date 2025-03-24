@@ -1,5 +1,12 @@
+"""
+    aloha()
+
+Prints an ASCII art representation along with the text "Hawai'i-Five-O".
+If you see the the Hawaiian "shaka" hand gesture, relax and take it easy, 
+because [SymbolicQuartetNetworkCoal.jl] is installed correctly.
+"""
 function aloha()
-    print("
+    println(raw"""
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⠂⢀⡀⠀⢀⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣤⣄⣠⣀⠀⠘⠋⠉⠉⠁⠀⠺⣿⡷⣿⣿⣿⡿⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⣛⠛⠉⠀⠀⠀⠀⠺⣷⣦⠀⠀⠀⠙⠛⠉⠀⠀⠈⣿⣦⣤⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -18,32 +25,41 @@ function aloha()
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ Hawai'i-Five-O
-    ")
+    """)
 end
 
 
 """
-    readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integer)
+    readTopologyrand(net; scaleparameter=1.0, dpoints=7)
 
-    Generates randomized values for all edge lengths and inheritance probabilities in the input network.
-    Input network can be either Newick or extended Newick string or `HybridNetwork` object with or without 
-    parameters specified. Binary network is assumed, and the output is non-ultrametric network.
-    Specifically, edge length is determined by scaleparameter*(edge.number+randomized value between 0 and 1).
-    The scale parameter is set as 1.0 by default. Inheritance probabilities lie between 0 and 1.
+Generates randomized values for all edge lengths and inheritance probabilities in the input network.
 
-    Note this function is not to simulate realistic parameter values in an empty network topology.
-    Instead, it is to place `dummy` values so the topology can be used for the downstream functions.
+## Description
+The input network can be provided as either a Newick/Extended Newick string or a PhyloNetworks `HybridNetwork` object, 
+with or without parameters specified. The function assumes a **binary network** and produces a **non-ultrametric network**.
 
-    '''
-    # Arguments:
-    * net: input network with/without parameter specified. this can be a newick string or a file that contains newick.
-    * scaleparameter: multiplies the generated edge length by this value.
-    * dpoints: precision set as a global constant. 7 digits by default.
+- Edge lengths are determined using:  
+  `scaleparameter * (edge.number + random value in [0,1])`  
+  The `scaleparameter` defaults to `1.0`.
+- Inheritance probabilities (gamma values) are assigned random values in the range (0,1).
+
+**Note:**  
+This function does **not** simulate realistic parameters in an empty network topology. 
+This function is not intended to simulate parameters with biological background.
+Instead, it assigns **dummy** values to allow the topology to be processed by downstream functions.
+
+## Arguments
+- `net`: The input network (Newick string, file containing Newick, or a `HybridNetwork` object).
+- `scaleparameter`: Multiplier applied to the generated edge lengths. Defaults to `1.0`.
+- `dpoints`: Number of decimal places for rounding. Defaults to `7`.
+
+## Returns
+- A PhyloNetworks `HybridNetwork` object with randomly assigned edge lengths and inheritance probabilities.
 """
-function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integer)
+function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoints)
     #---------read in topology: input is either newick string or HybridNetwork object---------#
-    if typeof(net)==HybridNetwork net=net
-    else net=PN.readTopology(net) end
+    if net isa PhyloNetworks.HybridNetwork
+    else net=PhyloNetworks.readTopology(net) end
 
     #--------generaete arbitrary edge lengths--------#
     for e in net.edge e.length=round((scaleparameter*(e.number+rand())),digits=dpoints) end
@@ -58,24 +74,20 @@ function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integ
     #check the number of hybrid nodes are counted correctly
     length(reticulatenodeindex)==nreticulate || @error "Inheritance probability generation failed. Retry."
     #generate arbitrary gamma values n=number of reticulation nodes (that will be assigned to one of the incoming edges)
-    for nthgamma in 1:nreticulate 
-        gamval=rand()
-        while !(0.0<gamval<1.0) gamval=rand() end #to make sure the generated gamma is [0,1].
-        gammavec[nthgamma]=round(gamval,digits=dpoints)
-    end
+    gammavec .= round.(rand(nreticulate), digits=dpoints)
     #assign inheritance probabilities to all reticulate edges
     for nthgamma in 1:nreticulate
-        nthvisit=1
+        visits = 0
         for e in net.edge
-            if e.hybrid
-                child=PhyloNetworks.getchild(e)
-                if child.number==reticulatenodeindex[nthgamma]
-                    if nthvisit==1 e.gamma=round(gammavec[nthgamma],digits=dpoints)
-                        nthvisit+=1
-                    elseif nthvisit==2 e.gamma=round((1-gammavec[nthgamma]),digits=dpoints)
-                    else @error("Hybrid node $(reticulatenodeindex[nthgamma]) has >2 incoming edges.")
-                    end
-                end 
+            if e.hybrid && PhyloNetworks.getchild(e).number == reticulatenodeindex[nthgamma]
+                visits += 1
+                if visits == 1
+                    e.gamma = gammavec[nthgamma]
+                elseif visits == 2
+                    e.gamma = round(1 - gammavec[nthgamma], digits=dpoints)
+                else
+                    error("Hybrid node $(reticulatenodeindex[nthgamma]) has more than 2 incoming edges.")
+                end
             end
         end
     end
@@ -84,89 +96,341 @@ function readTopologyrand(net;scaleparameter=1.0::Float64,dpoints=dpoints::Integ
 end
 
 """
-    parameterDictionary(net,inheritancecorrelation;convert=false)
+    parameterDictionary(net, inheritancecorrelation; tauSymbol="", gammaSymbol="")
 
-    Creates a dictionary of parameter labels to values (edge lengths and inheritance probabilities) in a network.
-    This dictionary is used to transform the parameter values into symbolic strings.
+Creates a dictionary mapping parameter labels to values (edge lengths and inheritance probabilities) in a network.
+
+## Description
+This function generates a dictionary where:
+- **Edge lengths (`τ`)** are assigned symbolic labels (`t_{i}`).
+- **Inheritance probabilities (`γ`)** are assigned symbolic labels (`r_{j}`).
+- **Inheritance correlation (`ρ`)** is included as `&rho`, along with `1 - ρ`.
+
+For merged edges, symbolic names are assigned based on `mergedEdgeLengthandSymbolicName`.
+
+## Arguments
+- `net`: The input PhyloNetworks `HybridNetwork` object.
+- `inheritancecorrelation`: The inheritance correlation value, which is rounded and assigned a symbolic label.
+- `tauSymbol`: (Optional) Custom prefix for edge length symbols. Default is `"t_"`. [to be added in future versions]
+- `gammaSymbol`: (Optional) Custom prefix for inheritance probability symbols. Default is `"r_"`. [to be added in future versions]
+
+## Returns
+- A `Dict{Any, String}` mapping numerical values to symbolic parameter labels.
 """
-function parameterDictionary(net,inheritancecorrelation;
-                    tauSymbol=""::String,gammaSymbol=""::String)
-        dict=Dict()
-        #dictionary for tau
-        numEdges=length(net.edge)
-        allNetEdges=collect(1:numEdges)
-        termedgenum=Int[e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
-        maximumNumberEdgesMerged=6 #future todo
-        
-        for mergeRange in 1:maximumNumberEdgesMerged
-            if mergeRange==1
-                for e in allNetEdges
-                    dict[net.edge[e].length] = "t_{$e}"      
-                end
-            else
-                edgevec = combinations(allNetEdges,mergeRange) |> collect
-                for edgeCombination in edgevec
-                    if isempty(intersect(edgeCombination,termedgenum))# && !disjointedges(net,edgeCombination)
-                        length,symbolicName=mergedEdgeLengthandSymbolicName(net,edgeCombination)
-                        dict[length]=symbolicName
-                    end
+function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_", gammaSymbol::String="r_")
+    dict = Dict()
+    # Dictionary for edge lengths (τ)
+    numEdges = length(net.edge)
+    allNetEdges = collect(1:numEdges)
+    termedgenum = [e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
+    maxMergedEdges = max_edges_between_internal(net)+net.numHybrids
+    for mergeRange in 1:maxMergedEdges
+        if mergeRange == 1
+            for e in allNetEdges
+                dict[net.edge[e].length] = "$tauSymbol{$e}"
+            end
+        else
+            edgeCombinations = collect(combinations(allNetEdges, mergeRange))
+            for edgeCombo in edgeCombinations
+                if isempty(intersect(edgeCombo, termedgenum))
+                    length, symbolicName = mergedEdgeLengthandSymbolicName(net, edgeCombo)
+                    dict[length] = symbolicName
                 end
             end
         end
-        
-        #dictionary for gamma
-        hybnodenum=Integer[]
-        for n in net.node
-            if n.hybrid push!(hybnodenum,n.number) end
-        end
-    
-        for j in 1:net.numHybrids
-            hybnode=hybnodenum[j]
-            i=1
-            for e in net.edge
-                child=PhyloNetworks.getchild(e)
-                if child.number==hybnode
-                    e.gamma=round(e.gamma,digits=dpoints)
-                    if i==1 dict[e.gamma]="r_{$j}"
-                       # if(convert) dict["r_{$j}"] = e.gamma end
-                        i+=1
-                    elseif i==2 dict[e.gamma]="(1-r_{$j})"
-                    else @error("Hybrid node $(child.num) has >2 incoming edges.")
-                    end
-                end 
+    end
+    # Dictionary for inheritance probabilities (γ)
+    hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
+    for j in 1:net.numHybrids
+        hybNode = hybridNodeNumbers[j]
+        visitCount = 1
+        for e in net.edge
+            if PhyloNetworks.getchild(e).number == hybNode
+                e.gamma = round(e.gamma, digits=dpoints)
+                if visitCount == 1
+                    dict[e.gamma] = "$gammaSymbol{$j}"
+                    visitCount += 1
+                elseif visitCount == 2
+                    dict[e.gamma] = "(1-$gammaSymbol{$j})"
+                else
+                    error("Hybrid node $(hybNode) has more than 2 incoming edges.")
+                end
             end
         end
-    
-        #inheritance correlation (rho) stuff
-        inheritancecorrelation=round(inheritancecorrelation,digits=dpoints)
-        oneminusrho=round(1-inheritancecorrelation,digits=dpoints)
-        dict[inheritancecorrelation]="&rho"
-        dict[oneminusrho] = "1-&rho"
-      
-        return dict
     end
+    # Inheritance correlation (ρ)
+    inheritancecorrelation = round(inheritancecorrelation, digits=dpoints)
+    dict[inheritancecorrelation] = "&rho"
+    dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-&rho"
+    return dict
+end
+
+"""
+    mergedEdgeLengthandSymbolicName(net::HybridNetwork, edgevec::Vector{Int})
+
+Computes the total edge length and generates a symbolic name for a given set of edges.
+
+## Description
+Given a vector of edge indices (`edgevec`) in a `HybridNetwork`, this function:
+- **Sums** the lengths of the specified edges.
+- **Constructs a symbolic name** in the form `"-t_{e1}-t_{e2}..."`.
+
+## Arguments
+- `net`: A `HybridNetwork` object.
+- `edgevec`: A vector containing edge indices.
+
+## Returns
+- length and symbolicName where:
+  - `length` is the total length of the selected edges (rounded to `dpoints`).
+  - `symbolicName` is a concatenated symbolic representation of these edges.
+"""
+function mergedEdgeLengthandSymbolicName(net::HybridNetwork, edgevec::Vector{Int})
+    total_length = sum(net.edge[e].length for e in edgevec)
+    symbolic_name = join(["-t_{$e}" for e in edgevec])
+    symbolic_name=chop(symbolic_name,head=1,tail=0)#remove the very first "-"
+    total_length = round(total_length, digits=dpoints)
+    return total_length, symbolic_name
+end
+
+"""
+    gettingSymbolicTopology(net::HybridNetwork, dict::Dict)
+
+Replaces numeric parameter values with symbolic representations in an extended Newick string.
+
+## Description
+This function converts a `HybridNetwork` topology into an **extended Newick format** where:
+- Edge lengths are replaced by symbols of the form `"t_{e}"`.
+- Inheritance probabilities (`γ`) are replaced using their corresponding symbolic values from `dict`.
+
+## Arguments
+- `net`: A `HybridNetwork` object.
+- `dict`: A dictionary mapping numerical values to symbolic labels.
+
+## Returns
+- A string representing the network in symbolic extended Newick format.
+"""
+function gettingSymbolicTopology(net::HybridNetwork, dict::Dict)
+    eNewick=PN.writeTopology(net)
+    for e in net.edge 
+        eNewick=replace(eNewick,"$(e.length)"=>"t_{$(e.number)}")
+        eNewick=replace(eNewick,"$(e.gamma)"=>"$(dict[e.gamma])")
+    end
+    return eNewick
+end
     
 """
-    mergedEdgeLengthandSymbolicName(net::HybridNetwork,edgevec::Vector)
+    gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
-    This function is takes a vector of edge numbers and the network topology and
-    returns the sume of edges in the vector and their symbolic name.
-"""
-    function mergedEdgeLengthandSymbolicName(net::HybridNetwork,edgevec::Vector)
-        length=0.0    
-        symbolicName=""
-        for enum in edgevec 
-            length+=net.edge[enum].length 
-            symbolicName*="-t_{$enum}"
+Transforms numerical values in the concordance factor (CF) equations into symbolic representations.
+
+## Description
+This function updates a dataframe (`df`) containing CF equations by replacing:
+- The inheritance correlation `"rho"` with its numerical value.
+- Edge-related terms `"-t_{e}"` with `"X{e}"`.
+- Hybrid-related terms `"r_{e}"` with `"R{e}"`.
+- Exponential terms `"exp(-t_{e})"` into `"(X{e}"`.
+- Other symbolic replacements for consistency.
+
+Additionally, it extracts and returns a **sorted list of unique symbolic parameters** used in the CF equations.
+
+## Arguments
+- `net`: A `HybridNetwork` object.
+- `df`: A dataframe containing CF equations.
+- `inheritancecorrelation`: The numerical value of the inheritance correlation.
+
+## Returns
+- A sorted vector of unique symbolic parameters used in the CF equations.
+"""   
+function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
+    edgenumber = length(net.edge)
+    retnumber = length(net.hybrid)
+    numCFs = size(df, 1)
+    
+    params = String[]
+
+    for i in 1:numCFs
+        df[i, 2] = replace(df[i, 2], "rho" => "$inheritancecorrelation")
+        record = false
+        expressions = String[]
+
+        for e in 1:edgenumber
+            if occursin("-t_{$e}", df[i, 2])
+                push!(expressions, "X$e")
+            end
         end
-        length=round(length,digits=dpoints)
-        symbolicName=chop(symbolicName,head=1,tail=0)#remove the very first "-"
-    
-        return length,symbolicName
+
+        for e in 1:retnumber
+            if occursin("r_{$e}", df[i, 2])
+                push!(expressions, "R$e")
+            end
+        end    
+
+        append!(params, expressions)
     end
 
-"""
+    params = unique(params)
 
+    # Replace symbolic expressions in CF equations
+    for cf in 1:numCFs
+        df[cf, 2] = replace(df[cf, 2], "r_{" => "R")   # Replace hybrid parameter notation
+        df[cf, 2] = replace(df[cf, 2], "exp(-t_{" => "(X")  # Replace exponential notation
+        df[cf, 2] = replace(df[cf, 2], "-t_{" => "*X")  # Replace edge length notation
+        df[cf, 2] = replace(df[cf, 2], "})" => ")")     # Close parentheses
+        df[cf, 2] = replace(df[cf, 2], "}" => "")       # Remove extra braces
+    end
+
+    return sort!(params)
+end
+    
+"""
+    makeEdgeLabel(net; showTerminalEdgeLabels=false)
+
+Generates a dataframe mapping edge numbers to their symbolic labels.
+
+## Description
+This function creates labels for the edges of a `HybridNetwork` in the format `"t_{e}"`, where `e` is the edge number.  
+By default, labels are only assigned to **non-terminal edges** (i.e., edges that do not end at leaf nodes).  
+The output dataframe is used as input for PhyloPlots' option `edgelabel=``.
+Setting `showTerminalEdgeLabels=true` includes labels for terminal edges as well.
+
+## Arguments
+- `net`: A `HybridNetwork` object.
+- `showTerminalEdgeLabels`: A boolean flag (default = `false`).  
+   - `false`: Excludes terminal edges.  
+   - `true`: Includes all edges.  
+
+## Returns
+- A `DataFrame` with columns:
+  - `number`: Edge numbers.
+  - `label`: Corresponding symbolic labels (`"t_{e}"`).
+"""
+function makeEdgeLabel(net; showTerminalEdgeLabels=false)
+    edges_to_include = [e for e in net.edge if !PhyloNetworks.getchild(e).leaf || showTerminalEdgeLabels]
+    df = DataFrame(
+        number = [e.number for e in edges_to_include],
+        label = ["t_{$(e.number)}" for e in edges_to_include]
+    )
+    return df
+end
+
+"""
+    max_edges_between_internal(net::HybridNetwork)
+
+Compute the maximum number of edges between any pair of internal nodes in a phylogenetic network.
+
+An internal node is defined as any node that is not a leaf (i.e., `!node.leaf`). This includes
+both tree-like internal nodes and hybrid nodes (nodes with multiple parents due to reticulation).
+The function uses a breadth-first search (BFS) to calculate the shortest path (in terms of edge count)
+between all pairs of internal nodes and returns the maximum such distance. Hybrid nodes are fully
+considered, with all incoming and outgoing edges explored to ensure all possible routes are accounted for.
+
+# Arguments
+- `net::HybridNetwork`: A phylogenetic network object from the PhyloNetworks package.
+
+# Returns
+- `Int`: The maximum number of edges between any two internal nodes. Returns 0 if there are fewer
+  than 2 internal nodes. Returns -1 for a pair of nodes if no path exists (though this should not
+  occur in a valid, connected `HybridNetwork`).
+"""
+function max_edges_between_internal(net::HybridNetwork)
+    # Step 1: Identify internal nodes (non-leaf nodes, including hybrid nodes)
+    internal_nodes = PhyloNetworks.Node[]
+    for node in net.node
+        if !node.leaf  # Exclude leaves
+            push!(internal_nodes, node)
+        end
+    end
+    
+    if length(internal_nodes) < 2
+        return 0  # Need at least 2 internal nodes for a path
+    end
+
+    # Step 2: Function to compute edge distance between two nodes using BFS
+    function edge_distance(start::PhyloNetworks.Node, target::PhyloNetworks.Node)
+        visited = Set{PhyloNetworks.Node}()
+        queue = Tuple{PhyloNetworks.Node, Int}[]  # (node, distance)
+        push!(queue, (start, 0))
+        push!(visited, start)
+
+        while !isempty(queue)
+            current, dist = popfirst!(queue)
+            if current == target
+                return dist
+            end
+
+            # Explore all edges connected to the current node
+            for edge in net.edge
+                next_node = nothing
+                if edge.node[1] == current && !(edge.node[2] in visited)
+                    next_node = edge.node[2]
+                elseif edge.node[2] == current && !(edge.node[1] in visited)
+                    next_node = edge.node[1]
+                end
+                
+                if next_node !== nothing
+                    push!(queue, (next_node, dist + 1))
+                    push!(visited, next_node)
+                end
+            end
+        end
+        return -1  # No path (shouldn't happen in a connected network)
+    end
+
+    # Step 3: Find maximum edge distance between all pairs of internal nodes
+    max_dist = 0
+    for i in 1:length(internal_nodes)-1
+        for j in i+1:length(internal_nodes)
+            dist = edge_distance(internal_nodes[i], internal_nodes[j])
+            if dist > max_dist
+                max_dist = dist
+            end
+        end
+    end
+
+    return max_dist
+end
+
+"""
+    network_expectedCF_formulas(network::HybridNetwork; 
+                                showprogressbar=true, 
+                                inheritancecorrelation=0, 
+                                filename="symbolicQNC-HFO-out"::AbstractString, 
+                                symbolic=false::Bool, 
+                                savecsv=false::Bool, 
+                                macaulay=false::Bool, 
+                                matlab=false::Bool, 
+                                multigraded=false::Bool)
+
+Compute expected concordance factors (CFs) for quartets in a phylogenetic network, optionally generating symbolic formulas.
+
+This function calculates the expected concordance factors (CFs) for all possible quartets of taxa in a `HybridNetwork`, 
+taking into account coalescent processes and inheritance correlations at hybrid nodes. It can operate in numerical mode 
+(default) or symbolic mode (when `symbolic=true`), where it expresses CFs as formulas involving branch lengths and 
+inheritance parameters (γ). Results are logged to a file, and optional outputs can be saved as CSV, Macaulay2, MATLAB, 
+or multigraded implicitization files for further analysis.
+
+# Arguments
+- `network::HybridNetwork`: A phylogenetic network from the PhyloNetworks package, with edge lengths in coalescent units and γ values for hybrid edges.
+- `showprogressbar::Bool=true`: If true, displays a progress bar for quartet calculations.
+- `inheritancecorrelation::Number=0`: Correlation between inheritance probabilities at hybrid nodes (must be between 0 and 1).
+- `filename::AbstractString="symbolicQNC-HFO-out"`: Base name for output files (e.g., log, CSV, Macaulay2, MATLAB).
+- `symbolic::Bool=false`: If true, computes CFs as symbolic expressions; requires all edge parameters to be defined or assigns random values.
+- `savecsv::Bool=false`: If true, saves CFs to a CSV file named `<filename>.csv`.
+- `macaulay::Bool=false`: If true, generates a Macaulay2 script (`<filename>.m2.txt`) for symbolic analysis; requires `symbolic=true`.
+- `matlab::Bool=false`: If true, generates a MATLAB script (`<filename>.matlab.txt`) for symbolic analysis; requires `symbolic=true`.
+- `multigraded::Bool=false`: If true, generates a Macaulay2 multigraded implicitization script (`<filename>.im.m2.txt`); requires `symbolic=true`.
+
+# Returns
+- `quartet::Vector{PhyloNetworks.QuartetT}`: Array of QuartetT objects containing quartet indices, taxa, and CFs (numerical or symbolic).
+- `taxa::Vector{String}`: Sorted list of taxon names from the network.
+
+# Throws
+- `ErrorException`: If the root is a leaf, edge lengths are missing/negative, γ values are missing/negative, or inheritance correlation is invalid.
+- `ErrorException`: If `macaulay` or `matlab` is true but `symbolic` is false.
+
+# Side Effects
+- Writes a log file (`<filename>.log`) with topology, parameters, and CFs.
+- Optionally writes CSV, Macaulay2, MATLAB, or multigraded files based on flags.
 """
 function network_expectedCF_formulas(network::HybridNetwork; 
                             showprogressbar=false, 
@@ -191,8 +455,22 @@ function network_expectedCF_formulas(network::HybridNetwork;
     str="General setting: \n"
     str*="Symbolic option: "
     if(symbolic) 
-        net=deepcopy(network)
-        net=readTopologyrand(net)
+        net=deepcopy(network)        
+        #check if params all exist otherwise, assign them using readTopologyrand
+        params=true
+        for e in net.edge
+            if e.length<0
+                params=false
+            end
+        end
+
+        if !(params)
+            @warn("Input topology is missing some parameters. Assigning arbitrary values using [readTopologyrand]")
+            net=readTopologyrand(net)
+        else
+            net=network
+        end
+
         str*="on\n"
     else
         net=network 
@@ -394,8 +672,8 @@ function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
                                 df,
                                 symbolic,
                                 dict)
-    #kong: create an array that stores the CF formulas for ab|cd, ac|bd, ad|bc
-    qCFp=String["","",""] #*-_-*#
+    #create an array that stores the CF formulas for ab|cd, ac|bd, ad|bc
+    qCFp=String["","",""] 
 
     net = deepcopy(net)
     PN.removedegree2nodes!(net)
@@ -405,12 +683,11 @@ function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
         deleteleaf!(net, taxon, simplify=false, unroot=false)
         # would like unroot=true but deleteleaf! throws an error when the root is connected to 2 outgoing hybrid edges
     end
-    #println("[144]Input network = $(PN.writeTopologyLevel1(net))")
     
     q,qCFp=network_expectedCF_4taxa!(net, taxa[quartet.taxonnumber], inheritancecorrelation, qCFp, dict, symbolic)
     quartet.data .= q
 
-    #kong: storing the equations to DataFrames
+    #storing the equations to DataFrames
     for i in 1:3
         qCFp[i]=replace(qCFp[i], "&"=>"")
         qCFp[i]=filter(x -> !isspace(x), qCFp[i])
@@ -514,16 +791,13 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
         end
 
-        #internallength=round(internallength, digits = dpoints)
         minorcf = exp(-internallength)/3
         majorcf = 1.0 - 2 * minorcf
         qCF = (sistertofirst == 2 ? MVector{3,Float64}(majorcf,minorcf,minorcf) :
               (sistertofirst == 3 ? MVector{3,Float64}(minorcf,majorcf,minorcf) :
                                     MVector{3,Float64}(minorcf,minorcf,majorcf) ))
         
-        #kong: writing out the equations
-        #println(internallength)
-        #println(dict[internallength])
+        #writing out the equations
         internallength=round(internallength, digits = dpoints)
         if symbolic
             minorcfp = "exp(-$(dict[internallength]))/3"
@@ -568,7 +842,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             
             #kong: writing gamma into qCF equations
             if symbolic qCFp .*= "*$(dict[gamma])" 
-            else qCFp .*= "*$gamma"end
+            else qCFp .*= "*$gamma" end
         end
         
         #kong: closing qCFq with a bracket
@@ -580,12 +854,9 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     # by now: 2 descendant below the lowest hybrid node: hardest case
     # weighted qCFs average of 3 networks: 2 displayed, 1 "parental" (unless same parents)
     sameparents = (inheritancecorrelation == 1)
-    #inheritancecorrelation=round(inheritancecorrelation, digits = dpoints)
-    #dict[inheritancecorrelation]="&rho"
-    #dict[oneminusrho] = "1-&rho"
 
     oneminusrho = 1 - inheritancecorrelation
-    #oneminusrho=round(oneminusrho, digits = dpoints)
+
     if symbolic 
         oneminusrhop="1-$(dict[inheritancecorrelation])"
     else
@@ -598,14 +869,13 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     deepcoalprob = exp(-internallength)
     deepcoalprob=round(deepcoalprob, digits = dpoints)
     internallength=round(internallength, digits = dpoints)
-    #dict[deepcoalprob]="e^{-$(dict[internallength])}"
+
     if symbolic deepcoalprobp="exp(-$internallength)" end
     # initialize qCF: when the 2 descendants coalesce before reaching the hybrid node
     qCF = (sistertofirst == 2 ? MVector{3,Float64}(1.0-deepcoalprob,0.0,0.0) :
           (sistertofirst == 3 ? MVector{3,Float64}(0.0,1.0-deepcoalprob,0.0) :
                                 MVector{3,Float64}(0.0,0.0,1.0-deepcoalprob) ))
 
-    #kong: deepcoalprobability
     if symbolic deepcoalprobp = "exp(-$(dict[internallength]))" 
     else deepcoalprobp = "exp(-$internallength)" end
     
@@ -628,7 +898,6 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
       weighti = deepcoalprob * pgam
       #kong: round weighti to n digits
       weighti=round(weighti, digits = dpoints)
-      #dict[weighti]="($(dict[deepcoalprob])*($(dict[pgam])))"
       
       for j in (sameparents ? i : 1):i # if inheritancecorrelation=1 then i!=j has probability 0
         gammaj = parenthedge[j].gamma
@@ -706,113 +975,4 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     return qCF, qCFp
 end
 
-function gettingSymbolicTopology(net::HybridNetwork,dict)
-    eNewick=PN.writeTopology(net)
-    for e in net.edge 
-        eNewick=replace(eNewick,"$(e.length)"=>"t_{$(e.number)}")
-        eNewick=replace(eNewick,"$(e.gamma)"=>"$(dict[e.gamma])")
-    end
-    return eNewick
-end
-
-
-function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
-    edgenumber=length(net.edge)
-    retnumber=length(net.hybrid)
-    numCFs=size(df)[1]
-    params=String[]
-
-    for i in 1:numCFs
-        df[i,2]=replace(df[i,2],"rho"=>"$inheritancecorrelation")
-        string=df[i,2]
-        record=false
-        expressions=String[]
-        
-        for e in 1:length(net.edge)
-            if(occursin("-t_{$e}","$(df[i,2])"))
-                push!(expressions,"X$e")
-            end
-        end
-
-        for e in 1:length(net.hybrid)
-            if(occursin("r_{$e}","$(df[i,2])"))
-                #println("r_{$e},$(df[i,2])")
-                push!(expressions,"R$e")
-            end
-        end    
-        append!(params,expressions)
-    end
-
-    params=unique(params)
-    ring=String[]
-    for i in params
-        x=split(i, "}-")
-        for j in x
-            push!(ring,j)
-        end
-    end
-
-    params=sort!(params)
-    
-    for cf in 1:numCFs
-        df[cf,2]=replace(df[cf,2],"r_{" => "R" )#Ropen
-        df[cf,2]=replace(df[cf,2],"exp(-t_{" => "(X" )
-        df[cf,2]=replace(df[cf,2],"-t_{" => "*X" )
-        df[cf,2]=replace(df[cf,2],"})" => ")" )
-        df[cf,2]=replace(df[cf,2],"}" => "" )#close
-    end
-    
-    return params
-end
-
-"""
-
-"""
-function makeEdgeLabel(net; showTerminalEdgeLabels=false)
-    df=DataFrame(number=Integer[],label=String[])
-    for e in net.edge
-        child=PN.getchild(e)
-        if(child.leaf) && showTerminalEdgeLabels
-            continue
-        else
-            push!(df,(e.number,"t_{$(e.number)}"))
-        end
-    end
-    return df
-end
-
-
-
-
-
-
-#to be updated 
-#check if the selected edges are disjoint or not
-function disjointedges(net,edgeCombination)
-    uvSet=[]
-    disjoint=false
-    for e in edgeCombination push!(uvSet,[(PhyloNetworks.getparent(net.edge[e])).number,(PhyloNetworks.getchild(net.edge[e])).number]) end
-    println(uvSet)
-    for uvCurrent in uvSet
-        println("1")
-        u=uvCurrent[1]
-        v=uvCurrent[2]
-        println("u,v : $u,$v")
-        for uvCheck in uvSet
-            println("2")
-            if(u in uvCheck) continue
-            println("u in uvCheck : $u,$uvCheck")
-            elseif(v in uvCheck) continue
-            println("v in uvCheck : $v,$uvCheck")
-            else 
-                println("u and v are both not in")
-                break
-            end
-            
-        end
-        println("3")
-    end
-    return disjoint        
-end
-
-#max number of composite edges
+#to be added - option to change tau/gamam symbol
