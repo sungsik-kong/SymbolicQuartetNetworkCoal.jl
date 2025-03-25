@@ -123,7 +123,7 @@ function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_"
     numEdges = length(net.edge)
     allNetEdges = collect(1:numEdges)
     termedgenum = [e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
-    maxMergedEdges = max_edges_between_internal(net)+net.numHybrids
+    maxMergedEdges = max_edges_from_leaf_to_leaf(net)-2
     for mergeRange in 1:maxMergedEdges
         if mergeRange == 1
             for e in allNetEdges
@@ -313,81 +313,81 @@ function makeEdgeLabel(net; showTerminalEdgeLabels=false)
     return df
 end
 
-"""
-    max_edges_between_internal(net::HybridNetwork)
-
-Compute the maximum number of edges between any pair of internal nodes in a phylogenetic network.
-
-An internal node is defined as any node that is not a leaf (i.e., `!node.leaf`). This includes
-both tree-like internal nodes and hybrid nodes (nodes with multiple parents due to reticulation).
-The function uses a breadth-first search (BFS) to calculate the shortest path (in terms of edge count)
-between all pairs of internal nodes and returns the maximum such distance. Hybrid nodes are fully
-considered, with all incoming and outgoing edges explored to ensure all possible routes are accounted for.
-
-# Arguments
-- `net::HybridNetwork`: A phylogenetic network object from the PhyloNetworks package.
-
-# Returns
-- `Int`: The maximum number of edges between any two internal nodes. Returns 0 if there are fewer
-  than 2 internal nodes. Returns -1 for a pair of nodes if no path exists (though this should not
-  occur in a valid, connected `HybridNetwork`).
-"""
-function max_edges_between_internal(net::HybridNetwork)
-    # Step 1: Identify internal nodes (non-leaf nodes, including hybrid nodes)
-    internal_nodes = PhyloNetworks.Node[]
+function max_edges_from_leaf_to_leaf(net::PhyloNetworks.HybridNetwork)
+    # Step 1: Identify leaves and the root
+    leaves = PhyloNetworks.Node[]
     for node in net.node
-        if !node.leaf  # Exclude leaves
-            push!(internal_nodes, node)
+        if node.leaf
+            push!(leaves, node)
         end
+    end
+    root = net.node[net.root]
+    
+    if isnothing(root)
+        error("Root not found in the network")
     end
     
-    if length(internal_nodes) < 2
-        return 0  # Need at least 2 internal nodes for a path
-    end
+    #println("Number of leaves: ", length(leaves))
+    #for (i, leaf) in enumerate(leaves)
+        #println("Leaf $i: number=$(leaf.number)")
+    #end
+    #println("Root: number=$(root.number)")
 
-    # Step 2: Function to compute edge distance between two nodes using BFS
-    function edge_distance(start::PhyloNetworks.Node, target::PhyloNetworks.Node)
+    # Step 2: Function to count edges from a leaf to the root using getparent
+    function edges_to_root(leaf::PhyloNetworks.Node)
+        current = leaf
+        edge_count = 0
         visited = Set{PhyloNetworks.Node}()
-        queue = Tuple{PhyloNetworks.Node, Int}[]  # (node, distance)
-        push!(queue, (start, 0))
-        push!(visited, start)
+        push!(visited, current)
+        path = [current.number]  # Debug path
 
-        while !isempty(queue)
-            current, dist = popfirst!(queue)
-            if current == target
-                return dist
+        while current != root
+            parent = nothing
+            # Use getparent to move upward; handle major and minor parents for hybrid nodes
+            try
+                parent = PhyloNetworks.getparent(current)
+            catch e
+                # If no major parent, try minor parent (for hybrid nodes)
+                parent = PhyloNetworks.getparentminor(current) 
             end
-
-            # Explore all edges connected to the current node
-            for edge in net.edge
-                next_node = nothing
-                if edge.node[1] == current && !(edge.node[2] in visited)
-                    next_node = edge.node[2]
-                elseif edge.node[2] == current && !(edge.node[1] in visited)
-                    next_node = edge.node[1]
-                end
-                
-                if next_node !== nothing
-                    push!(queue, (next_node, dist + 1))
-                    push!(visited, next_node)
-                end
+            if isnothing(parent)
+                #println("Traversal path for leaf $(leaf.number): ", path)
+                error("No parent found for node $(current.number) on path from leaf $(leaf.number) to root $(root.number)")
             end
+            if parent in visited
+                #println("Traversal path for leaf $(leaf.number): ", path)
+                error("Cycle detected at node $(parent.number) from leaf $(leaf.number) to root $(root.number)")
+            end
+            current = parent
+            edge_count += 1
+            push!(visited, current)
+            push!(path, current.number)
         end
-        return -1  # No path (shouldn't happen in a connected network)
+        #println("Path from leaf $(leaf.number) to root: ", path)
+        return edge_count
     end
 
-    # Step 3: Find maximum edge distance between all pairs of internal nodes
-    max_dist = 0
-    for i in 1:length(internal_nodes)-1
-        for j in i+1:length(internal_nodes)
-            dist = edge_distance(internal_nodes[i], internal_nodes[j])
-            if dist > max_dist
-                max_dist = dist
+    # Step 3: Compute distances for all leaves
+    distances = Dict{PhyloNetworks.Node, Int}()
+    for leaf in leaves
+        dist = edges_to_root(leaf)
+        distances[leaf] = dist
+        #println("Edges from leaf $(leaf.number) to root: $dist")
+    end
+
+    # Step 4: Find maximum sum for all pairs of leaves
+    max_sum = 0
+    for i in 1:length(leaves)-1
+        for j in i+1:length(leaves)
+            sum_dist = distances[leaves[i]] + distances[leaves[j]]
+            #println("Sum for leaves $(leaves[i].number) and $(leaves[j].number): $sum_dist")
+            if sum_dist > max_sum
+                max_sum = sum_dist
             end
         end
     end
 
-    return max_dist
+    return max_sum
 end
 
 """
