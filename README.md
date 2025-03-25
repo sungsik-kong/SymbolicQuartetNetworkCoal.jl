@@ -77,14 +77,19 @@ The function `network_expectedCF_formulas` is the core function that produces th
   - Network topology written in Newick 
 
 - Optional arguments
-  - `showprogressbar(=false [default])`
-  - `inheritancecorrelation(=0 [default])`
-  - `filename(=""symbolicQNC-HFO-out" [default])`
-  - `symbolic(=false [default])`
-  - `savecsv(=false [default])`
-  - `macaulay(=false [default])`
-  - `matlab(=false [default])`
-  - `multigraded(=false [default])`
+  - `network::HybridNetwork`: A phylogenetic network from the PhyloNetworks package, with edge lengths in coalescent units and γ values for hybrid edges.
+  - `showprogressbar::Bool=true`: If true, displays a progress bar for quartet calculations.
+  - `inheritancecorrelation::Number=0`: Correlation between inheritance probabilities at hybrid nodes (must be between 0 and 1).
+  - `filename::AbstractString="symbolicQNC-HFO-out"`: Base name for output files (e.g., log, CSV, Macaulay2, MATLAB).
+  - `symbolic::Bool=false`: If true, computes CFs as symbolic expressions; requires all edge parameters to be defined or assigns random values.
+  - `savecsv::Bool=false`: If true, saves CFs to a CSV file named `<filename>.csv`.
+  - `macaulay::Bool=false`: If true, generates a Macaulay2 script (`<filename>.m2.txt`) for symbolic analysis; requires `symbolic=true`.
+  - `matlab::Bool=false`: If true, generates a MATLAB script (`<filename>.matlab.txt`) for symbolic analysis; requires `symbolic=true`.
+  - `multigraded::Bool=false`: If true, generates a Macaulay2 multigraded implicitization script (`<filename>.im.m2.txt`); requires `symbolic=true`.
+
+-Returns:
+  - `quartet::Vector{PhyloNetworks.QuartetT}`: Array of QuartetT objects containing quartet indices, taxa, and CFs (numerical or symbolic).
+  - `taxa::Vector{String}`: Sorted list of taxon names from the network.
 
 #### Numerical formulas
 
