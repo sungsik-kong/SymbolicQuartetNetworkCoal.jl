@@ -227,7 +227,7 @@ julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,sym
 
 ### Visualizing network with parameter names
 ```@julia
-julia> el=makeEdgeLabel(net)
+julia> el=makeEdgeLabel(net, showTerminalEdgeLabels=false)
 20×2 DataFrame
  Row │ number   label
      │ Integer  String
