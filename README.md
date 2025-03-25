@@ -53,14 +53,14 @@ The function `readTopologyrand()` topology imports a (extended) Newick string or
 Briefly, the n^th edge that appears in the Newick topology will have the length of n plus a random value drawn from the uniform distribution of U(0,1). The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is `1`. The inheritance probability is drawn from the uniform distribution of U(0,1).
 
 ```@julia
-julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
+julia> net=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
 PhyloNetworks.HybridNetwork, Rooted Network
 20 edges
 19 nodes: 8 tips, 2 hybrid nodes, 9 internal tree nodes.
 tip labels: C, A, G, H, ...
 ((C:1.447,A:2.341):3.512,(((G:4.325,H:5.036):6.06,(((E:7.226,F:8.802):9.386)#H2:10.989::0.509)#H1:11.467::0.889):12.585,((#H2:13.222::0.491,(B:14.527,D:15.871):16.692):17.377,#H1:18.815::0.111):19.026):20.727);
 
-julia> ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));",scaleparameter=0.1)
+julia> net=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));",scaleparameter=0.1)
 PhyloNetworks.HybridNetwork, Rooted Network
 20 edges
 19 nodes: 8 tips, 2 hybrid nodes, 9 internal tree nodes.
@@ -84,13 +84,12 @@ The function `network_expectedCF_formulas` is the core function that produces th
   - `savecsv(=false [default])`
   - `macaulay(=false [default])`
   - `matlab(=false [default])`
+  - `multigraded(=false [default])`
 
 #### Numerical formulas
 
-The function 
-
 ```@julia
-julia> network_expectedCF_formulas(ik1,inheritancecorrelation=0)```
+julia> network_expectedCF_formulas(net,inheritancecorrelation=0)```
 
 SymbolicQuartetNetworkCoal.jl log
 Timestamp: 2025-02-24T18:45:18.762
@@ -144,12 +143,12 @@ AD|BC		(exp(-77.2281649)/3)
 ```
 
 ```@julia
-julia> network_expectedCF(ik1,savecsv=true)
+julia> network_expectedCF(net,savecsv=true)
 ```
 
 #### Symbolic formulas
 ```@julia
-julia> julia> network_expectedCF(ik1,savecsv=true,symbolic=true)
+julia> julia> network_expectedCF(net,savecsv=true,symbolic=true)
 ```
 
 ```
@@ -206,19 +205,24 @@ AB|CE		(((exp(-t_{3}-t_{20})/3)*r_{2}+(exp(-t_{3}-t_{19}-t_{20})/3)*(1
 ```
 ### Creating Macaulay2 and Matlab input file
 To use algebraic methods to study the coalescent model for a given network, we can think of the quartet CFs as a parametrization. The Zariski closure of the image of this parametrization is an *algebraic variety*. Such varieties are studied in algebraic statistics.
-- setting the option `macaulay=true` in the function `network_expectedCF` produces a text file with Macaulay2 script to compute the ideal associated with the CF parametrization and its dimension.
+- setting the option `macaulay=true` in the function `network_expectedCF_formulas` produces a text file with Macaulay2 script to compute the ideal associated with the CF parametrization and its dimension.
 ```@julia
-julia> network_expectedCF(ik1,savecsv=true,symbolic=true,macaulay=true)
+julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,symbolic=true,macaulay=true)
 ```
 Sometimes, it may be challenging to compute the ideal of our CF parametrization, and we may only need information about the variety (like the dimension), which can be obtained without computing the elimination ideal of the CF parametrization.
-- setting the option `matlab=true` in the function `network_expectedCF` produces a text file with MATLAB script to compute the dimension of the variety associated with the CF parametrization. This computation is done numerically using the methods in the paper [*Witness sets of projections*](https://www3.nd.edu/~jhauenst/preprints/hsProjection.pdf) by Jonathan D. Hauenstein and Andrew J. Sommese.
+- setting the option `matlab=true` in the function `network_expectedCF_formulas` produces a text file with MATLAB script to compute the dimension of the variety associated with the CF parametrization. This computation is done numerically using the methods in the paper [*Witness sets of projections*](https://www3.nd.edu/~jhauenst/preprints/hsProjection.pdf) by Jonathan D. Hauenstein and Andrew J. Sommese.
 ```@julia
-julia> network_expectedCF(ik1,savecsv=true,symbolic=false, matlab=true)
+julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,symbolic=true, matlab=true)
+```
+One can set the option `multigraded=true` in the function `network_expectedCF_formulas` to get a text file containing Macaulay2 scripts to compute some (degree) graded piece of the elimination ideal of our CF parametrization using the method in J. Cummings and B. Hollering's paper: [Computing Implicitizations of Multi-Graded Polynomial Maps](https://arxiv.org/abs/2311.07678).
+
+```@julia
+julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,symbolic=true, multigraded=true)
 ```
 
 ### Visualizing network with parameter names
 ```@julia
-julia> el=makeEdgeLabel(ik1)
+julia> el=makeEdgeLabel(net)
 20×2 DataFrame
  Row │ number   label
      │ Integer  String
@@ -247,7 +251,7 @@ julia> el=makeEdgeLabel(ik1)
 
 ```@julia  
 julia> using PhyloPlots
-julia> plot(ik1,edgelabel=elabels)
+julia> plot(net,edgelabel=elabels)
 ```
 ![Alt text](example/edgelabeled-ik1.png)
 
