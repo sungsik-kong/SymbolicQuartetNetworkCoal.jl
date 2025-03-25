@@ -7,9 +7,10 @@
         count=0
 
         #true vs numeric
-        filename="sim_nets.txt" #2000 simulated network from Morley et al. 
         #filename="ik3.txt"
-        #filename="topologies_n5_l2.txt"
+        filename="topologies_n5_l2.txt"
+#        filename="sim_nets.txt" #2000 simulated network from Morley et al. 
+
         
         open(filename, "r") do file
             for i in eachline(file)
