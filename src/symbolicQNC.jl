@@ -494,11 +494,12 @@ function network_expectedCF_formulas(network::HybridNetwork;
     str="------------------------\n"
     str*="Topology:\n"
     str*="$(writeTopology(net,digits=dpoints))\n"
-    str*="$(gettingSymbolicTopology(net,dict))\n"
+    if(symbolic) str*="$(gettingSymbolicTopology(net,dict))\n" end
     write(logfile,str)
     flush(logfile)
     
     #-----------setting up desk-----------#
+    #need to fix when some parameter values are identical
     df = DataFrame(Split=String[], CF=String[]) 
     str="------------------------\n"
     str*="Parameters:\n"
@@ -508,8 +509,14 @@ function network_expectedCF_formulas(network::HybridNetwork;
         if(e.hybrid) str*="$(dict[e.gamma])\t\t$(e.gamma)\n" end
     end
     str*="$(dict[inheritancecorrelation])\t\t$(inheritancecorrelation)\n"
-    write(logfile,str)
-    flush(logfile)    
+    if symbolic
+        write(logfile,str)
+        flush(logfile)    
+    else
+        str=""
+        write(logfile,str)
+        flush(logfile)    
+    end
     
     #--------(almost) original stuff--------#
     net.node[net.root].leaf && error("The root can't be a leaf.")
