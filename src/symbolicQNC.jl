@@ -580,7 +580,7 @@ function network_expectedCF_formulas(network::HybridNetwork;
         params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
     end
     if(macaulay)
-        open("$filename.m2.txt", "w") do file
+        open("$filename.m2", "w") do file
         str="R = QQ["
         for par in params str=str*par*"," end
         str=str*"C_1..C_$numCFs]\n"
