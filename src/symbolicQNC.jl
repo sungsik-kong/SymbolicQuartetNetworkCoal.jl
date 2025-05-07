@@ -43,7 +43,7 @@ with or without parameters specified. The function assumes a **binary network** 
   The `scaleparameter` defaults to `1.0`.
 - Inheritance probabilities (gamma values) are assigned random values in the range (0,1).
 
-**Note:**  
+**Caution:**  
 This function does **not** simulate realistic parameters in an empty network topology. 
 This function is not intended to simulate parameters with biological background.
 Instead, it assigns **dummy** values to allow the topology to be processed by downstream functions.
