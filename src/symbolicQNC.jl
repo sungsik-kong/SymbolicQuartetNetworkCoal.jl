@@ -43,7 +43,7 @@ with or without parameters specified. The function assumes a **binary network** 
   The `scaleparameter` defaults to `1.0`.
 - Inheritance probabilities (gamma values) are assigned random values in the range (0,1).
 
-**Note:**  
+**Caution:**  
 This function does **not** simulate realistic parameters in an empty network topology. 
 This function is not intended to simulate parameters with biological background.
 Instead, it assigns **dummy** values to allow the topology to be processed by downstream functions.
@@ -407,11 +407,11 @@ or multigraded implicitization files for further analysis.
 - `network::HybridNetwork`: A phylogenetic network from the PhyloNetworks package, with edge lengths in coalescent units and γ values for hybrid edges.
 - `showprogressbar::Bool=true`: If true, displays a progress bar for quartet calculations.
 - `inheritancecorrelation::Number=0`: Correlation between inheritance probabilities at hybrid nodes (must be between 0 and 1).
-- `filename::AbstractString="symbolicQNC-HFO-out"`: Base name for output files (e.g., log, CSV, Macaulay2, MATLAB).
+- `filename::AbstractString="symbolicQNC_HFO_out"`: Base name for output files (e.g., log, CSV, Macaulay2, MATLAB).
 - `symbolic::Bool=false`: If true, computes CFs as symbolic expressions; requires all edge parameters to be defined or assigns random values.
 - `savecsv::Bool=false`: If true, saves CFs to a CSV file named `<filename>.csv`.
 - `macaulay::Bool=false`: If true, generates a Macaulay2 script (`<filename>.m2.txt`) for symbolic analysis; requires `symbolic=true`.
-- `matlab::Bool=false`: If true, generates a MATLAB script (`<filename>.matlab.txt`) for symbolic analysis; requires `symbolic=true`.
+- `matlab::Bool=false`: If true, generates a MATLAB script (`<filename>.m`) for symbolic analysis; requires `symbolic=true`.
 - `multigraded::Bool=false`: If true, generates a Macaulay2 multigraded implicitization script (`<filename>.im.m2.txt`); requires `symbolic=true`.
 
 # Returns
@@ -429,7 +429,7 @@ or multigraded implicitization files for further analysis.
 function network_expectedCF_formulas(network::HybridNetwork; 
                             showprogressbar=false, 
                             inheritancecorrelation=0, 
-                            filename="symbolicQNC-HFO-out"::AbstractString,     
+                            filename="symbolicQNC_HFO_out"::AbstractString,     
                             symbolic=false::Bool,
                             savecsv=false::Bool,
                             macaulay=false::Bool,
@@ -575,7 +575,7 @@ function network_expectedCF_formulas(network::HybridNetwork;
         params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
     end
     if(macaulay)
-        open("$filename.m2.txt", "w") do file
+        open("$filename.m2", "w") do file
         str="R = QQ["
         for par in params str=str*par*"," end
         str=str*"C_1..C_$numCFs]\n"
@@ -597,7 +597,7 @@ function network_expectedCF_formulas(network::HybridNetwork;
 
     #matlab output
     if(matlab)
-        open("$filename.matlab.txt", "w") do file 
+        open("$filename.m", "w") do file 
             str="% Declare variables\n"
             str=str*"syms "
             for par in params str=str*par*" " end
