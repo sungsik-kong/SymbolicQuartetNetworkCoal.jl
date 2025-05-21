@@ -123,7 +123,7 @@ function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_"
     numEdges = length(net.edge)
     allNetEdges = collect(1:numEdges)
     termedgenum = [e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
-    maxMergedEdges = max_edges_from_leaf_to_leaf(net)-2
+    maxMergedEdges = net.numTaxa + 2*(net.numHybrids) #max_edges_from_leaf_to_leaf(net)-2
     for mergeRange in 1:maxMergedEdges
         if mergeRange == 1
             for e in allNetEdges
@@ -326,12 +326,6 @@ function max_edges_from_leaf_to_leaf(net::PhyloNetworks.HybridNetwork)
     if isnothing(root)
         error("Root not found in the network")
     end
-    
-    #println("Number of leaves: ", length(leaves))
-    #for (i, leaf) in enumerate(leaves)
-        #println("Leaf $i: number=$(leaf.number)")
-    #end
-    #println("Root: number=$(root.number)")
 
     # Step 2: Function to count edges from a leaf to the root using getparent
     function edges_to_root(leaf::PhyloNetworks.Node)
@@ -440,7 +434,8 @@ function network_expectedCF_formulas(network::HybridNetwork;
                             savecsv=false::Bool,
                             macaulay=false::Bool,
                             matlab=false::Bool,
-                            multigraded=false::Bool
+                            multigraded=false::Bool,
+                            singular=false::Bool
                             )
     
     #----------filename and logging----------#
@@ -652,6 +647,38 @@ function network_expectedCF_formulas(network::HybridNetwork;
         end
     end
 
+    if(singular)
+        open("$filename.sing.txt", "w") do file
+        str="ring R = 0, ("
+        for par in params str=str*par*"," end
+        for i in 1:numCFs str=str*"C$i," end
+        str=chop(str)
+        str=str*"), dp;\n"
+        str=str*"ideal I = \n"
+        i=1
+        while i<numCFs
+            str=str*"$(dataframe[i,2])-C$i,\n"
+            i+=1
+        end
+        str=str*"$(dataframe[numCFs,2])-C$numCFs;\n"
+
+        str=str*"ideal G = eliminate (I, "
+        for par in params str=str*par*"*" end
+        str=chop(str)
+        str=str*");\n"
+
+        str=str*"ring S = 0, ("
+        for i in 1:numCFs str=str*"C$i," end
+        str=chop(str)
+        str=str*"), dp;\n"
+        str=str*"ideal J = imap(R, G);\n"
+        str=str*"int dimJ = dim(J);\n"
+        str=str*"dimJ;"
+
+        write(file, str)
+    end
+end
+
     return quartet, taxa
 end
 
@@ -690,6 +717,9 @@ function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
         deleteleaf!(net, taxon, simplify=false, unroot=false)
         # would like unroot=true but deleteleaf! throws an error when the root is connected to 2 outgoing hybrid edges
     end
+
+    #PN.printEverything(net)
+    #dict=parameterDictionary(net,inheritancecorrelation)
     
     q,qCFp=network_expectedCF_4taxa!(net, taxa[quartet.taxonnumber], inheritancecorrelation, qCFp, dict, symbolic)
     quartet.data .= q
