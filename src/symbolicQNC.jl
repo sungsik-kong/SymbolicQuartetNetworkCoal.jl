@@ -393,7 +393,8 @@ end
                                 savecsv=false::Bool, 
                                 macaulay=false::Bool, 
                                 matlab=false::Bool, 
-                                multigraded=false::Bool)
+                                multigraded=false::Bool,
+                                singular=false::Bool)
 
 Compute expected concordance factors (CFs) for quartets in a phylogenetic network, optionally generating symbolic formulas.
 
@@ -410,9 +411,10 @@ or multigraded implicitization files for further analysis.
 - `filename::AbstractString="symbolicQNC_HFO_out"`: Base name for output files (e.g., log, CSV, Macaulay2, MATLAB).
 - `symbolic::Bool=false`: If true, computes CFs as symbolic expressions; requires all edge parameters to be defined or assigns random values.
 - `savecsv::Bool=false`: If true, saves CFs to a CSV file named `<filename>.csv`.
-- `macaulay::Bool=false`: If true, generates a Macaulay2 script (`<filename>.m2.txt`) for symbolic analysis; requires `symbolic=true`.
+- `macaulay::Bool=false`: If true, generates a Macaulay2 script (`<filename>.m2`) for symbolic analysis; requires `symbolic=true`.
 - `matlab::Bool=false`: If true, generates a MATLAB script (`<filename>.m`) for symbolic analysis; requires `symbolic=true`.
 - `multigraded::Bool=false`: If true, generates a Macaulay2 multigraded implicitization script (`<filename>.im.m2.txt`); requires `symbolic=true`.
+- `singular::Bool=false`: If true, generates a Singular script (`<filename>.sing`); requires `symbolic=true`.
 
 # Returns
 - `quartet::Vector{PhyloNetworks.QuartetT}`: Array of QuartetT objects containing quartet indices, taxa, and CFs (numerical or symbolic).
@@ -648,7 +650,7 @@ function network_expectedCF_formulas(network::HybridNetwork;
     end
 
     if(singular)
-        open("$filename.sing.txt", "w") do file
+        open("$filename.sing", "w") do file
         str="ring R = 0, ("
         for par in params str=str*par*"," end
         for i in 1:numCFs str=str*"C$i," end
