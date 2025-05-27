@@ -422,11 +422,11 @@ or multigraded implicitization files for further analysis.
 
 # Throws
 - `ErrorException`: If the root is a leaf, edge lengths are missing/negative, γ values are missing/negative, or inheritance correlation is invalid.
-- `ErrorException`: If `macaulay` or `matlab` is true but `symbolic` is false.
+- `ErrorException`: If `macaulay`, `matlab`, or `singular` is true but `symbolic` is false.
 
 # Side Effects
 - Writes a log file (`<filename>.log`) with topology, parameters, and CFs.
-- Optionally writes CSV, Macaulay2, MATLAB, or multigraded files based on flags.
+- Optionally writes CSV, Macaulay2, MATLAB, multigraded, or Singular files based on flags.
 """
 function network_expectedCF_formulas(network::HybridNetwork; 
                             showprogressbar=false, 
