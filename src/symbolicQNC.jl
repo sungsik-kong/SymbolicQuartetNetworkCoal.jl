@@ -61,7 +61,7 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoin
     if net isa PhyloNetworks.HybridNetwork
     else net=PhyloNetworks.readTopology(net) end
 
-    #--------generaete arbitrary edge lengths--------#
+    #--------generate arbitrary edge lengths--------#
     for e in net.edge e.length=round((scaleparameter*(e.number+rand())),digits=dpoints) end
 
     #--------generaete arbitrary inheritance probabilities--------#
