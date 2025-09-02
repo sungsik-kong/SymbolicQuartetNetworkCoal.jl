@@ -95,6 +95,37 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoin
     return net
 end
 
+function assignBinaryEdgeLengths(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoints)
+        net=readTopologyrand(net;scaleparameter=scaleparameter,dpoints=dpoints)
+        function x(n::Integer)
+        n < 1 && throw(ArgumentError("n must be a positive integer"))
+        return BigFloat(10)^(n - 1)  # use BigInt so it works for very large n
+    end
+    
+    for e in net.edge e.length=x(e.number) end
+end
+
+function binary_to_tstring(x::BigFloat)
+    # Convert float to integer
+    n = BigInt(x)
+    
+    # Convert integer to binary string
+    binary_str = string(n)
+    
+    # Check that it's binary
+    if any(c -> c != '0' && c != '1', binary_str)
+        error("Input must represent a binary number (e.g., 10101101).")
+    end
+    
+    # Find positions with '1'
+    t = length(binary_str)
+    positions = [t - i + 1 for (i, c) in enumerate(binary_str) if c == '1']
+
+    # Join as required
+    return join(["t_{$i}" for i in positions], "-")
+end
+
+
 """
     parameterDictionary(net, inheritancecorrelation; tauSymbol="", gammaSymbol="")
 
@@ -823,9 +854,14 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             error("2+ cut edges, yet 4-taxon tree, degree-3 root and no degree-2 nodes. taxa: $(fourtaxa)")
         sistertofirst = 2    # arbitrarily correct if 3-way polytomy (no cut edge)
         internallength = 0.0 # correct if polytomy
+        elen=0.0
         for e in cutpool
             length(cutpool) < 3 || println("more than 2 edged merged")
             internallength += e.length
+
+            #elen=parse(BigFloat, string(e.length))
+            #internallength += elen
+            
             hwc = hardwiredCluster(e, fourtaxa)
             sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
         end
@@ -840,6 +876,9 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         internallength=round(internallength, digits = dpoints)
         if symbolic
             minorcfp = "exp(-$(dict[internallength]))/3"
+            
+            #minorcfp = "exp(-$(binary_to_tstring(internallength)))/3"
+           
             majorcfp = "1-2*$minorcfp"
         else
             minorcfp = "exp(-$internallength)/3"

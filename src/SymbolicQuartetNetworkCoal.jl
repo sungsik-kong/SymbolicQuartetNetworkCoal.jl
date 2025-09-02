@@ -1,9 +1,9 @@
 #test written by Sungsik Kong 2025
-
 module SymbolicQuartetNetworkCoal
 
     using Combinatorics
     using CSV
+
     using DataFrames
     using Dates
     using PhyloNetworks
@@ -18,9 +18,13 @@ module SymbolicQuartetNetworkCoal
     aloha,
     readTopologyrand,
     network_expectedCF_formulas,
-    makeEdgeLabel
+    makeEdgeLabel,
+    assignBinaryEdgeLengths,
+    binaryValToString
     #plot_ntwk_with_Symbolic_Names,
 
     include("symbolicQNC.jl")
 
 end # module
+
+

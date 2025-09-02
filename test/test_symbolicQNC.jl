@@ -24,6 +24,7 @@
                 println("Currenet tree:\n$i")
                 #ik1=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
                 ik1=SymbolicQuartetNetworkCoal.readTopologyrand(i)
+            #SymbolicQuartetNetworkCoal.assignBinaryEdgeLengths(ik1)
                 #Q0,T0=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(ik1,filename="temp")
 
                 
@@ -71,6 +72,7 @@
                 for x in 1:nreps
                     #ik1=readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
                     ik1=SymbolicQuartetNetworkCoal.readTopologyrand(i)
+                #SymbolicQuartetNetworkCoal.assignBinaryEdgeLengths(ik1)
                     QM,TM=network_expectedCF_formulas(ik1,symbolic=true,savecsv=true,filename="temp-macaulay-matlab-$x",inheritancecorrelation=ih,macaulay=true,matlab=true)
                 end
                 for y in 1:(nreps-1)
