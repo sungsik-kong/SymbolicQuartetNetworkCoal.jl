@@ -1,132 +1,4 @@
 """
-    aloha()
-
-Prints an ASCII art representation along with the text "Hawai'i-Five-O".
-If you see the the Hawaiian "shaka" hand gesture, relax and take it easy, 
-because [SymbolicQuartetNetworkCoal.jl] is installed correctly.
-"""
-function aloha()
-    println(raw"""
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⠂⢀⡀⠀⢀⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣤⣄⣠⣀⠀⠘⠋⠉⠉⠁⠀⠺⣿⡷⣿⣿⣿⡿⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⣛⠛⠉⠀⠀⠀⠀⠺⣷⣦⠀⠀⠀⠙⠛⠉⠀⠀⠈⣿⣦⣤⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣆⠀⠈⠉⠁⠀⠀⠀⠀⠀⠀⠀⠙⠉⠀⠀⢸⣦⠀⠀⠀⢀⣼⣿⣿⣿⣿⣷⡄⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢺⣿⣿⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⣧⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢀⡆⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣷⠄⠀⠀⠀⠀⠀
-⢠⣾⣷⣦⡀⠘⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⢠⣿⣿⣿⡿⠟⠛⠋⠁⣀⣠⣤⣄⣀⠀
-⠘⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⣾⣶⣿⣿⣿⣿⣿⣿⣟⠘⣿⣷⡀⠀⠀⠘⠿⡿⠉⠀⠀⣀⣴⣾⣿⣿⣿⣿⡿⡂
-⠀⠈⠿⢟⣿⣿⣆⠀⠀⠀⠀⢀⣤⣤⣿⣿⣿⣿⣿⣎⠛⢫⣿⣿⣿⣷⡘⢿⣿⣆⠀⠀⠀⠀⠀⢀⣾⣿⣿⣿⣿⣿⡿⠛⠋⠁
-⠀⠀⠀⢺⣿⣿⣿⣷⡄⠀⢰⣿⣿⣿⣯⠹⣿⣿⣿⣷⣶⡜⢿⣿⣿⣿⣷⡄⠹⣿⣷⣄⠀⠀⣴⣼⣿⣿⣿⣿⠟⠉⠀⠀⠀⠀
-⠀⠀⠀⠀⠙⢻⣿⣿⣿⣦⡘⢿⣿⣿⣿⣃⠉⢿⣿⣿⣿⣿⡌⢻⣝⠻⠿⢃⡀⣿⣿⣿⣷⣶⣿⣿⣿⣿⡿⠃⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣷⣄⠛⣿⣿⣿⣿⣄⠻⣿⣿⣿⣿⡆⠙⠷⠶⠟⢠⣿⣿⣿⣿⣿⣿⣿⣿⡟⠁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⡇⠈⠻⣿⣿⣿⣷⠘⠧⣉⣁⡴⠀⢠⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣷⣄⠙⠧⣍⣩⡜⢀⣀⣀⠄⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣿⣷⣦⣄⣀⣤⣾⣿⣿⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ Hawai'i-Five-O
-    """)
-end
-
-
-"""
-    readTopologyrand(net; scaleparameter=1.0, dpoints=7)
-
-Generates randomized values for all edge lengths and inheritance probabilities in the input network.
-
-## Description
-The input network can be provided as either a Newick/Extended Newick string or a PhyloNetworks `HybridNetwork` object, 
-with or without parameters specified. The function assumes a **binary network** and produces a **non-ultrametric network**.
-
-- Edge lengths are determined using:  
-  `scaleparameter * (edge.number + random value in [0,1])`  
-  The `scaleparameter` defaults to `1.0`.
-- Inheritance probabilities (gamma values) are assigned random values in the range (0,1).
-
-**Caution:**  
-This function does **not** simulate realistic parameters in an empty network topology. 
-This function is not intended to simulate parameters with biological background.
-Instead, it assigns **dummy** values to allow the topology to be processed by downstream functions.
-
-## Arguments
-- `net`: The input network (Newick string, file containing Newick, or a `HybridNetwork` object).
-- `scaleparameter`: Multiplier applied to the generated edge lengths. Defaults to `1.0`.
-- `dpoints`: Number of decimal places for rounding. Defaults to `7`.
-
-## Returns
-- A PhyloNetworks `HybridNetwork` object with randomly assigned edge lengths and inheritance probabilities.
-"""
-function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoints)
-    #---------read in topology: input is either newick string or HybridNetwork object---------#
-    if net isa PhyloNetworks.HybridNetwork
-    else net=PhyloNetworks.readTopology(net) end
-
-    #--------generate arbitrary edge lengths--------#
-    for e in net.edge e.length=round((scaleparameter*(e.number+rand())),digits=dpoints) end
-
-    #--------generaete arbitrary inheritance probabilities--------#
-    #----preambles----#
-    reticulatenodeindex=Int[]
-    nreticulate=net.numHybrids
-    gammavec=zeros(nreticulate)
-    #getting hybrid node index numbers
-    for n in net.node n.hybrid && push!(reticulatenodeindex,n.number) end
-    #check the number of hybrid nodes are counted correctly
-    length(reticulatenodeindex)==nreticulate || @error "Inheritance probability generation failed. Retry."
-    #generate arbitrary gamma values n=number of reticulation nodes (that will be assigned to one of the incoming edges)
-    gammavec .= round.(rand(nreticulate), digits=dpoints)
-    #assign inheritance probabilities to all reticulate edges
-    for nthgamma in 1:nreticulate
-        visits = 0
-        for e in net.edge
-            if e.hybrid && PhyloNetworks.getchild(e).number == reticulatenodeindex[nthgamma]
-                visits += 1
-                if visits == 1
-                    e.gamma = gammavec[nthgamma]
-                elseif visits == 2
-                    e.gamma = round(1 - gammavec[nthgamma], digits=dpoints)
-                else
-                    error("Hybrid node $(reticulatenodeindex[nthgamma]) has more than 2 incoming edges.")
-                end
-            end
-        end
-    end
-
-    return net
-end
-
-function assignBinaryEdgeLengths(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoints)
-        net=readTopologyrand(net;scaleparameter=scaleparameter,dpoints=dpoints)
-        function x(n::Integer)
-        n < 1 && throw(ArgumentError("n must be a positive integer"))
-        return BigFloat(10)^(n - 1)  # use BigInt so it works for very large n
-    end
-    
-    for e in net.edge e.length=x(e.number) end
-end
-
-function binary_to_tstring(x::BigFloat)
-    # Convert float to integer
-    n = BigInt(x)
-    
-    # Convert integer to binary string
-    binary_str = string(n)
-    
-    # Check that it's binary
-    if any(c -> c != '0' && c != '1', binary_str)
-        error("Input must represent a binary number (e.g., 10101101).")
-    end
-    
-    # Find positions with '1'
-    t = length(binary_str)
-    positions = [t - i + 1 for (i, c) in enumerate(binary_str) if c == '1']
-
-    # Join as required
-    return join(["t_{$i}" for i in positions], "-")
-end
-
-
-"""
     parameterDictionary(net, inheritancecorrelation; tauSymbol="", gammaSymbol="")
 
 Creates a dictionary mapping parameter labels to values (edge lengths and inheritance probabilities) in a network.
@@ -854,14 +726,11 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             error("2+ cut edges, yet 4-taxon tree, degree-3 root and no degree-2 nodes. taxa: $(fourtaxa)")
         sistertofirst = 2    # arbitrarily correct if 3-way polytomy (no cut edge)
         internallength = 0.0 # correct if polytomy
-        elen=0.0
+        internallengthbinary = ""
         for e in cutpool
             length(cutpool) < 3 || println("more than 2 edged merged")
             internallength += e.length
-
-            #elen=parse(BigFloat, string(e.length))
-            #internallength += elen
-            
+            internallengthbinary=binary(e.number,internallengthbinary)
             hwc = hardwiredCluster(e, fourtaxa)
             sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
         end
@@ -875,10 +744,8 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         #writing out the equations
         internallength=round(internallength, digits = dpoints)
         if symbolic
-            minorcfp = "exp(-$(dict[internallength]))/3"
-            
-            #minorcfp = "exp(-$(binary_to_tstring(internallength)))/3"
-           
+            #minorcfp = "exp(-$(dict[internallength]))/3"
+            minorcfp = "exp(-$(binary_to_tstring(internallengthbinary)))/3"
             majorcfp = "1-2*$minorcfp"
         else
             minorcfp = "exp(-$internallength)/3"
@@ -947,14 +814,22 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     deepcoalprob = exp(-internallength)
     deepcoalprob=round(deepcoalprob, digits = dpoints)
     internallength=round(internallength, digits = dpoints)
-
+    #internallengthbinary = binary(funneledge[1].number,"")
+    internallengthbinary =  ( ispolytomy ? "0.0" : binary(funneledge[1].number,"")) 
     if symbolic deepcoalprobp="exp(-$internallength)" end
+    #if symbolic deepcoalprobp = "exp(-$(binary_to_tstring(binary(funneledge[1].number, internallengthbinary))))" end
+
     # initialize qCF: when the 2 descendants coalesce before reaching the hybrid node
     qCF = (sistertofirst == 2 ? MVector{3,Float64}(1.0-deepcoalprob,0.0,0.0) :
           (sistertofirst == 3 ? MVector{3,Float64}(0.0,1.0-deepcoalprob,0.0) :
                                 MVector{3,Float64}(0.0,0.0,1.0-deepcoalprob) ))
 
-    if symbolic deepcoalprobp = "exp(-$(dict[internallength]))" 
+    #if symbolic deepcoalprobp = "exp(-$(dict[internallength]))" 
+    if symbolic 
+        if internallengthbinary!=="0.0"
+            deepcoalprobp = "exp(-$(binary_to_tstring(internallengthbinary)))" 
+        end
+        #println("exp(-$(binary_to_tstring(internallengthbinary)))" )
     else deepcoalprobp = "exp(-$internallength)" end
     
     (sistertofirst == 2 ? (qCFp[1]*="(1-$deepcoalprobp)+",qCFp[2]*="",qCFp[3]*="") :
@@ -1052,5 +927,3 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     
     return qCF, qCFp
 end
-
-#to be added - option to change tau/gamam symbol

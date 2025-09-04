@@ -21,10 +21,9 @@ module SymbolicQuartetNetworkCoal
     makeEdgeLabel,
     assignBinaryEdgeLengths,
     binaryValToString
-    #plot_ntwk_with_Symbolic_Names,
 
+    include("misc.jl")
+    include("topology.jl")
     include("symbolicQNC.jl")
 
 end # module
-
-
