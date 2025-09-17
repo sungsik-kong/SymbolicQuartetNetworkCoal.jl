@@ -31,7 +31,8 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoin
     else net=PhyloNetworks.readTopology(net) end
 
     #--------generate arbitrary edge lengths--------#
-    for e in net.edge e.length=round((scaleparameter*(e.number+rand())),digits=dpoints) end
+    #for e in net.edge e.length=round((scaleparameter*(e.number+rand())),digits=dpoints) end
+    for e in net.edge e.length=round((scaleparameter*(e.number+0.1)),digits=dpoints) end
 
     #--------generaete arbitrary inheritance probabilities--------#
     #----preambles----#
