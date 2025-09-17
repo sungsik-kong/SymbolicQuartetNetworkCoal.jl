@@ -46,12 +46,12 @@ Examples:
 """
 function binary_to_tstring(binary_str::String)
     # Check that it's binary
-    if any(c -> c != '0' && c != '1', binary_str)
-        error("Input must represent a binary number (e.g., 10101101).")
-    end    
+    #if any(c -> c != '0' && c != '1', binary_str)
+    #    error("Input must represent a binary number (e.g., 10101101).")
+    #end    
     # Find positions with '1'
     t = length(binary_str)
-    positions = [t - i + 1 for (i, c) in enumerate(binary_str) if c == '1']
+    positions = [t - i + 1 for (i, c) in enumerate(binary_str) if c !== '0']
     # Join as required
     return join(["t_{$i}" for i in positions], "-")
 end
@@ -79,13 +79,13 @@ function binary(n::Int, binstr::String)
         return "1" * repeat("0", n-1)
     end    
     # Convert binary string to integer
-    original = parse(Int, binstr; base=2)    
+    original = parse(Int, binstr)#; base=2)    
     # Set the nth bit to 1
     new_value = original | (1 << (n-1))    
     # Determine the minimum length: keep at least n bits
     min_len = max(length(binstr), n)  
     # Convert to binary string
-    new_binstr = string(new_value, base=2)
+    new_binstr = string(new_value)#, base=2)
     # Pad with leading zeros if necessary
     if length(new_binstr) < min_len
         new_binstr = lpad(new_binstr, min_len, '0')
@@ -537,6 +537,7 @@ function Qfuseedgesat!(i::Integer, net::HybridNetwork, synth_e_dict, multgammas=
 pen=pe.number
 pep=PN.getparent(pe).number
 pec=PN.getchild(pe).number
+pee=deepcopy(pe)
     ce = nodei.edge[j==1 ? 2 : 1]
 cee=deepcopy(ce)
     if pe.hybrid       # unless it's a hybrid: should be --tree--> node i --hybrid-->
@@ -573,11 +574,13 @@ p=PN.getparent(ce).number
 c=PN.getchild(ce).number
 f1=parse(BigInt,synth_e_dict[(cee.number,PN.getparent(cee).number,PN.getchild(cee).number)])
 f2=parse(BigInt,synth_e_dict[(pen,pep,pec)])
+#println("parse(BigInt,synth_e_dict[($(cee.number),$(PN.getparent(cee).number),$(PN.getchild(cee).number))])==$f1")
+#println("parse(BigInt,synth_e_dict[($pen,$pep,$pec)])==$f2")
 synth_e_dict[(0,p,c)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(0,c,p)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(ce.number,p,c)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(ce.number,c,p)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
-#println("synth_e_dict[(ce.number,c,p)]=string(f1+f2): synth_e_dict[($(ce.number),$c,$p)]=string($(f1+f2))")
+#println("synth_e_dict[(ce.number,c,p)]=string(f1+f2): synth_e_dict[($(ce.number),$p,$c)]=string($(f1+f2))")
 end    
     return ce
 end
