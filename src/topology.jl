@@ -31,8 +31,8 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoin
     else net=PhyloNetworks.readTopology(net) end
 
     #--------generate arbitrary edge lengths--------#
-    #for e in net.edge e.length=round((scaleparameter*(e.number+rand())),digits=dpoints) end
-    for e in net.edge e.length=round((scaleparameter*(e.number+0.1)),digits=dpoints) end
+    for e in net.edge e.length=round(scaleparameter*(rand()),digits=dpoints) end #edge lengths <1, may be more realistic values
+    #for e in net.edge e.length=round((scaleparameter*(e.number+0.01)),digits=dpoints) end #this option makes it easier to keep track of elengths during debugging
 
     #--------generaete arbitrary inheritance probabilities--------#
     #----preambles----#
@@ -44,7 +44,7 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,dpoints::Integer=dpoin
     #check the number of hybrid nodes are counted correctly
     length(reticulatenodeindex)==nreticulate || @error "Inheritance probability generation failed. Retry."
     #generate arbitrary gamma values n=number of reticulation nodes (that will be assigned to one of the incoming edges)
-    gammavec .= round.(rand(nreticulate), digits=dpoints)
+    gammavec .= round.(rand(Uniform(0.2,0.499),nreticulate), digits=dpoints)
     #assign inheritance probabilities to all reticulate edges
     for nthgamma in 1:nreticulate
         visits = 0

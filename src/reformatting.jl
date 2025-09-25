@@ -1,4 +1,9 @@
-        
+function export_csv(df; filename="sqnc_output"::String)
+    CSV.write("$filename.csv",df,header=false)
+end
+
+
+#=
     #macaulay output
     numCFs=size(df)[1]
     if(symbolic) 
@@ -120,6 +125,6 @@
     end
 end
 
-    if(savecsv) CSV.write("$filename.csv",df,header=false) end
-    write(logfile,str)
-    flush(logfile)
+    
+
+=#

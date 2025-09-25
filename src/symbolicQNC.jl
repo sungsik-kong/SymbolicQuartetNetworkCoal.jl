@@ -90,7 +90,7 @@ function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
         taxonnumber[taxon] in quartet.taxonnumber && continue
         Qdeleteleaf!(net, taxon, synth_e_dict, simplify=false, unroot=false) # would like unroot=true but deleteleaf! throws an error when the root is connected to 2 outgoing hybrid edges
     end
-
+#println(taxa[quartet.taxonnumber])
     q,qCFp,synth_e_dict=network_expectedCF_4taxa!(net, taxa[quartet.taxonnumber], inheritancecorrelation, qCFp, dict, symbolic, synth_e_dict)
     quartet.data .= q
 
@@ -140,6 +140,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     if length(net.node[net.root].edge) <= 2
         Qfuseedgesat!(net.root, net,synth_e_dict)
     end
+
     # find and delete degree-2 blobs along external edges
     bcc = biconnectedComponents(net, true) # true: ignore trivial blobs
     entry = PN.biconnectedcomponent_entrynodes(net, bcc)
@@ -166,6 +167,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             # simplify=true: bc external blob
             #println("LINE 166")
             net,synth_e_dict=Qdeletehybridedge!(net,he,synth_e_dict,false,true,false,true,false)
+             
         end
     end
 
@@ -199,7 +201,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         cut_edges_pa=0
         cut_edges_ch=0
         enumber=1
-        binary=""
+
         for e in cutpool
             length(cutpool) < 3 || println("more than 2 edged merged")
             internallength += e.length
@@ -219,12 +221,14 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
 #binary=synth_e_dict[(cut_edges_pa,cut_edges_ch)]
 #println("binary: $binary")        
 binary1=synth_e_dict[(enumber,cut_edges_pa,cut_edges_ch)]
-#println("enumber,cut_edges_pa,cut_edges_ch,binary1:$enumber,$cut_edges_pa,$cut_edges_ch,$binary1")
+
+#println("binary1=synth_e_dict[(enumber,cut_edges_pa,cut_edges_ch)]:$(binary1=synth_e_dict[(enumber,cut_edges_pa,cut_edges_ch)])")
+#println("length_cutpool,enumber,cut_edges_pa,cut_edges_ch,binary1:$(length(cutpool)),$enumber,$cut_edges_pa,$cut_edges_ch,$binary1")
 
         if symbolic
-            #println(binary)
             minorcfp = "exp(-$(binary_to_tstring(binary1)))/3"
-#println("minorcfp: $minorcfp")
+#println("binary1: $binary1")            
+#println("minorcfp: $minorcfp\n")
             majorcfp = "1-2*$minorcfp"
         else
             minorcfp = "exp(-$internallength)/3" 
@@ -254,14 +258,14 @@ binary1=synth_e_dict[(enumber,cut_edges_pa,cut_edges_ch)]
             gamma = parenthedge[i].gamma
 p=PhyloNetworks.getparent(parenthedge[i])
 d=PhyloNetworks.getchild(parenthedge[i])
-b1=synth_e_dict[(0,p.number,d.number)]
+b1=synth_e_dict[(parenthedge[i].number,p.number,d.number)]
 for e in d.edge
     if e.hybrid
         continue
     else
         cc=PhyloNetworks.getchild(e)
-        synth_e_dict[(0,p.number,cc.number)]=SymbolicQuartetNetworkCoal.binary(e.number,b1)
-        synth_e_dict[(0,cc.number,p.number)]=SymbolicQuartetNetworkCoal.binary(e.number,b1)
+        synth_e_dict[(e.number,p.number,cc.number)]=SymbolicQuartetNetworkCoal.binary(e.number,b1)
+        synth_e_dict[(e.number,cc.number,p.number)]=SymbolicQuartetNetworkCoal.binary(e.number,b1)
         break
     end
 end
@@ -312,9 +316,9 @@ end
     sameparents = (inheritancecorrelation == 1)
     oneminusrho = 1 - inheritancecorrelation
     if symbolic 
-        oneminusrhop="1-$(dict[inheritancecorrelation])"
+        oneminusrhop="(1-$(dict[inheritancecorrelation]))"
     else
-        oneminusrhop="1-$inheritancecorrelation"
+        oneminusrhop="(1-$inheritancecorrelation)"
     end
     hwc = hardwiredCluster(parenthedge[1], fourtaxa)
     sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
@@ -335,7 +339,7 @@ c=PN.getchild(funneledge[1]).number
         if iszero(internallength)
             deepcoalprobp = "exp(-0.0)" 
         else
-            deepcoalprobp = "exp(-$(binary_to_tstring(synth_e_dict[(0,p,c)])))" 
+            deepcoalprobp = "exp(-$(binary_to_tstring(synth_e_dict[(funneledge[1].number,p,c)])))" 
         end
     else deepcoalprobp = "exp(-$internallength)" end
     (sistertofirst == 2 ? (qCFp[1]*="(1-$deepcoalprobp)+",qCFp[2]*="",qCFp[3]*="") :
@@ -366,39 +370,9 @@ c=PN.getchild(funneledge[1]).number
         for k in 1:nhe
             (k == i || k ==j) && continue # don't delete hybrid edges i or j
             pe_index = findfirst(e -> e.number == parenthnumber[k], simplernet.edge)
-#=            
-pe_parent=PhyloNetworks.getparent(simplernet.edge[pe_index])
-pe_parent_edges=pe_parent.edge
-remaining_edges = setdiff(pe_parent_edges, [simplernet.edge[pe_index]])
-nodeset=[]
-for e in remaining_edges
-    temp_n1=PhyloNetworks.getchild(e)
-    temp_n2=PhyloNetworks.getparent(e)
-    if temp_n1==pe_parent.number
-        push!(nodeset,temp_n2)
-    else
-        push!(nodeset,temp_n1)
-    end
-end
-temp_parent=PhyloNetworks.getparent(remaining_edges[1]).number
-temp_child=PhyloNetworks.getchild(remaining_edges[1]).number
-
-try
-    synth_e_dict[(nodeset[1].number,nodeset[2].number)]=SymbolicQuartetNetworkCoal.binary(remaining_edges[2].number,synth_e_dict[(temp_parent,temp_child)])
-catch
-    synth_e_dict[(nodeset[2].number,nodeset[1].number)]=SymbolicQuartetNetworkCoal.binary(remaining_edges[2].number,synth_e_dict[(temp_parent,temp_child)])
-end
-=#
-            #println("LINE 392")
-#println("touchere?2.5")
-#PN.printEverything(simplernet)
-#synth_e_dict[(-7,3)]="ABABABABABBABABABABABABABABBABABABABABABABBA"
-#println("synth_e_dict[(-7,3)]: $(synth_e_dict[(-7,3)])")
-
+#println("0synth_e_dict[(9,-3,6)]: $(synth_e_dict[(9,-3,6)])")
             simplernet,synth_e_dict=Qdeletehybridedge!(simplernet, simplernet.edge[pe_index],synth_e_dict,false,true,false,false,false) # ., unroot=true,., simplify=false,.
-#println("synth_e_dict[(-7,3)]: $(synth_e_dict[(-7,3)])")
-#PN.printEverything(simplernet)
-
+#println("9synth_e_dict[(9,-3,6)]: $(synth_e_dict[(9,-3,6)])")
         end
         if i != j
             # detach childedge[2] from hyb and attach it to hyb's parent j
@@ -439,11 +413,11 @@ end
             
             if symbolic
                 for i in 1:3
-                    qCFp[i] *= "((($deepcoalprobp * $(dict[pgam])) * ($(dict[gammaj]) * $(dict[oneminusrho]) + $(dict[inheritancecorrelation]))) * ($(qCFps[i])))"
+                    qCFp[i] *= "((($deepcoalprobp * $(dict[pgam])) * ($(dict[gammaj]) * ($(dict[oneminusrho])) + $(dict[inheritancecorrelation]))) * ($(qCFps[i])))"
                 end
             else
                 for i in 1:3
-                    qCFp[i] *= "((($deepcoalprobp * $pgam) * ($gammaj * $oneminusrhop + $inheritancecorrelation)) * ($(qCFps[i])))"
+                    qCFp[i] *= "((($deepcoalprobp * $pgam) * ($gammaj * ($oneminusrhop) + $inheritancecorrelation)) * ($(qCFps[i])))"
                 end
             end
         
@@ -457,7 +431,7 @@ end
     
             if symbolic
                 for i in 1:3
-                    qCFp[i] *= "((($deepcoalprobp * $(dict[pgam])) * $(dict[gammaj]) * $(dict[oneminusrho])) * ($(qCFps[i])+$(qCFps[flipped_ij[i]])))"
+                    qCFp[i] *= "((($deepcoalprobp * $(dict[pgam])) * $(dict[gammaj]) * ($(dict[oneminusrho]))) * ($(qCFps[i])+$(qCFps[flipped_ij[i]])))"
                 end
             else
                 for i in 1:3

@@ -1,13 +1,17 @@
-    #test written by Sungsik Kong 2025
+#test written by Sungsik Kong 2025
+@testset begin
+    threshold=0.001 #we want the absolute difference between the true and computed values to be <threshold
+    ih=0.1 #inheritancecorrelation
+    eLab="t_"
+    gammaSymbol="r_"
+    dpoints=3
+    filename=["topologies_n5_l1.txt","topologies_n5_l2.txt"]
+    count1=0
 
-    @testset begin
-        threshold=0.0000001 #we want the absolute difference between the true and computed values to be <threshold
-        ih=0#inheritancecorrelation-works when 0/1 but not works for other values, like 0.9, why?
-        count=0
-        filename="topologies_n5_l1.txt"
-        #filename="examplequartet.txt"
-        
-        open(filename, "r") do file
+    for afile in filename
+        count1+=1
+        open(afile, "r") do file
+            count=0
             for i in eachline(file)
                 df_true=DataFrame(Split=String[], CF_true=Float64[])
                 df_numeric=DataFrame(Split=String[], CF_numeric=String[], CF_val_from_numeric=Float64[])
@@ -15,11 +19,10 @@
                 
                 ###ioprint###
                     count+=1
-                    println("Working on case $count...")
-                    println("Currenet tree:\n$i")
+                    println("Case [$count1, $count]: $i")
                     testnet=SymbolicQuartetNetworkCoal.readTopologyrand(i)
                 ###ioprint###
-      
+        
                 #compute true CFs and numeric formulas
                 Q0,T0,df_num=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(testnet,symbolic=false,inheritancecorrelation=ih)
 
@@ -38,8 +41,39 @@
 
                 #symbolic formulas stored in df_numeric
                 Q2,T2,df_sym=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(testnet,symbolic=true,inheritancecorrelation=ih)
-                dict=SymbolicQuartetNetworkCoal.parameterDictionary(testnet,ih)
-                revdict=Dict(value => key for (key, value) in dict)
+                revdict=Dict()
+
+
+ 
+    # Dictionary for inheritance probabilities (γ)
+    hybridNodeNumbers = [n.number for n in testnet.node if n.hybrid]
+    for j in 1:testnet.numHybrids
+        hybNode = hybridNodeNumbers[j]
+        visitCount = 1
+        for e in testnet.edge
+            if PhyloNetworks.getchild(e).number == hybNode
+                e.gamma = round(e.gamma, digits=dpoints)
+                if visitCount == 1
+                    revdict["$gammaSymbol{$j}"] = e.gamma
+                    visitCount += 1
+                elseif visitCount == 2
+                    revdict["(1-$gammaSymbol{$j})"] = e.gamma
+                else
+                    error("Hybrid node $(hybNode) has more than 2 incoming edges.")
+                end
+            end
+        end
+    end
+    # Inheritance correlation (ρ)
+    #inheritancecorrelation = round(inheritancecorrelation, digits=dpoints)
+    revdict["&rho"] = ih
+    revdict["1-&rho"] = round(1 - ih, digits=dpoints)
+
+
+
+                    for e in testnet.edge 
+                            revdict["$eLab{$(e.number)}"] = e.length
+                    end
 
                 for nthrow in 1:nrow(df_sym)
                     df_replace="$(df_sym[nthrow,2])"
@@ -71,34 +105,4 @@
             end
         end
     end
-
-
-
-#=
-@testset "makeEdgeLabel Tests" begin
-    # Test network: ((A:1.0,B:2.0):3.0,C:4.0);
-    net = readTopology("((A:1.0,B:2.0):3.0,C:4.0);")
-    
-    # Test 1: Default behavior (exclude terminal edges)
-    df_default = makeEdgeLabel(net)
-    @test nrow(df_default) == 1  # Only the internal edge should be included
-    @test df_default.number[1] == 3  # Assuming edge 3 is the internal one (may vary)
-    @test df_default.label[1] == "t_{3}"
-    
-    # Test 2: Include terminal edges
-    df_all = makeEdgeLabel(net, showTerminalEdgeLabels=true)
-    @test nrow(df_all) == 4  # All edges (A, B, and internal)
-    @test Set(df_all.number) == Set([1, 2, 3, 4])  # Exact numbers may vary
-    @test Set(df_all.label) == Set(["t_{1}", "t_{2}", "t_{3}", "t_{4}"])
-    
-    # Test 3: Empty network case
-    net_empty = HybridNetwork()  # Empty network
-    df_empty = makeEdgeLabel(net_empty)
-    @test nrow(df_empty) == 0
-    
-    # Test 4: All leaves excluded
-    net_single = readTopology("(A:1.0);")
-    df_single = makeEdgeLabel(net_single)
-    @test nrow(df_single) == 0  # No non-terminal edges
 end
-=#

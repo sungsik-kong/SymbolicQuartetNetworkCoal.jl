@@ -134,7 +134,9 @@ function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_"
     # Dictionary for edge lengths (τ)
     numEdges = length(net.edge)
     allNetEdges = collect(1:numEdges)
-    termedgenum = [e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
+    for e in allNetEdges dict[net.edge[e].length] = "$tauSymbol{$e}" end
+    
+    #=termedgenum = [e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
     maxMergedEdges = net.numTaxa + 2*(net.numHybrids) #max_edges_from_leaf_to_leaf(net)-2
     for mergeRange in 1:maxMergedEdges
         if mergeRange == 1
@@ -151,7 +153,7 @@ function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_"
             end
         end
     end
-    
+    =#
     # Dictionary for inheritance probabilities (γ)
     hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
     for j in 1:net.numHybrids
@@ -178,8 +180,11 @@ function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_"
     return dict
 end
 
-function parameterDictionary1(net, inheritancecorrelation; gammaSymbol::String="r_")
+function parameterDictionary1(net, inheritancecorrelation; tauSymbol::String="t_", gammaSymbol::String="r_")
     dict = Dict()
+    #numEdges = length(net.edge)
+    #allNetEdges = collect(1:numEdges)
+
     
     # Dictionary for inheritance probabilities (γ)
     hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
@@ -595,6 +600,7 @@ function Qdeletehybridedge!(
     simplify::Bool=true,
     keeporiginalroot::Bool=false
 )
+
     edge.hybrid || error("edge $(edge.number) has to be hybrid for deletehybridedge!")
     n1 = getchild(edge)  # child of edge, to be deleted unless nofuse
     n1.hybrid || error("child node $(n1.number) of hybrid edge $(edge.number) should be a hybrid.")
@@ -628,18 +634,26 @@ function Qdeletehybridedge!(
         if multgammas
             ce.gamma = PhyloNetworks.multiplygammas(ce.gamma, pe.gamma)
         end
+#println("ce1:$ce")
+ce1=deepcopy(ce)
+#println("pe1:$pe")
+pe1=deepcopy(pe)
+
         PhyloNetworks.removeNode!(n1,ce) # ce now has 1 single node cn
         PhyloNetworks.setNode!(ce,pn)    # ce now has 2 nodes in this order: cn, pn
         ce.isChild1 = true
         PhyloNetworks.setEdge!(pn,ce)
-        if !(PN.getchild(ce).leaf) 
-f1=parse(BigInt,synth_e_dict[(0,PN.getparent(pe).number, PN.getchild(pe).number)])
-f2=parse(BigInt,synth_e_dict[(0,PN.getparent(ce).number, PN.getchild(ce).number)])
-synth_e_dict[(0,PN.getparent(ce).number,PN.getchild(ce).number)]=string(f1+f2)
-synth_e_dict[(0,PN.getchild(ce).number,PN.getparent(ce).number)]=string(f1+f2)
-synth_e_dict[(ce.number,PN.getparent(ce).number,PN.getchild(ce).number)]=string(f1+f2)
-synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(ce).number)]=string(f1+f2)
-    end
+#println("ce2:$ce")
+if !(PN.getchild(ce).leaf) 
+
+f1=parse(BigInt,synth_e_dict[(pe1.number,PN.getparent(pe1).number, PN.getchild(pe1).number)])
+f2=parse(BigInt,synth_e_dict[(ce1.number,PN.getparent(ce1).number, PN.getchild(ce1).number)])
+synth_e_dict[(0,PN.getparent(pe).number,PN.getchild(ce).number)]=string(f1+f2)
+synth_e_dict[(0,PN.getchild(ce).number,PN.getparent(pe).number)]=string(f1+f2)
+synth_e_dict[(ce.number,PN.getparent(pe).number,PN.getchild(ce).number)]=string(f1+f2)
+synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(pe).number)]=string(f1+f2)
+
+end
         PhyloNetworks.removeEdge!(pn,pe)
         # if (pe.number<ce.number) ce.number = pe.number; end # bad to match edges between networks
         PhyloNetworks.removeEdge!(n1,pe); PhyloNetworks.removeEdge!(n1,ce) # now n1 attached to edge only
@@ -656,6 +670,7 @@ synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(ce).number)]=string(
         # below: we will need to delete n1 recursively (hence edge)
     else # n1 has 4+ edges (polytomy) or 3 edges but we want to keep it anyway:
         # keep n1 but detach it from 'edge', set its remaining parent to major tree edge
+
         pe = getpartneredge(edge, n1) # partner edge: keep it this time
         if !pe.isMajor pe.isMajor=true; end
         pe.hybrid = false
@@ -681,41 +696,86 @@ synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(ce).number)]=string(
     elseif n2degree == 1
         error("node $(n2.number) (parent of hybrid edge $(edge.number) to be deleted) has 1 edge only!")
     else
-        
+#print("n2: $(n2)")  
+#print("n2.edge: $(n2.edge)")  
         # fixit: if n2degree == 2 && n2 === net.node[net.rooti] and
         #        if we want to keep original root: then delete edge but keep n2
         # detach n2 from edge, remove hybrid 'edge' from network
+
+
         PhyloNetworks.removeEdge!(n2,edge)
 
 #PN.printEverything(net)
-p1=PN.getparent(n2.edge[1])
-c1=PN.getchild(n2.edge[1])
-p2=PN.getparent(n2.edge[2])
-c2=PN.getchild(n2.edge[2])
-if !(c1.leaf) && !(c2.leaf)
-#println("p1,c1,p2,c2:$(p1.number),$(c1.number),$(p2.number),$(c2.number)")
-f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
-f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
-#println("n2.edge[1].number,c1.number,c2.number: $(n2.edge[1].number),$(c1.number),$(c2.number)")
-#println(f1)
-#println(f2)
-#println(f1+f2)
-synth_e_dict[(0,c1.number,c2.number)]=string(f1+f2)
-synth_e_dict[(0,c2.number,c1.number)]=string(f1+f2)
-synth_e_dict[(n2.edge[1].number,c1.number,c2.number)]=string(f1+f2)
-synth_e_dict[(n2.edge[1].number,c2.number,c1.number)]=string(f1+f2)
-#println("binary_to_tstring(string(f1+f2)):$(binary_to_tstring(string(f1+f2)))")
 
-#println("heh")
+if n2.hybrid
+    #println("Here?1")
+    p1=PN.getparent(n2.edge[1])
+    c1=PN.getchild(n2.edge[1])
+    p2=PN.getparent(n2.edge[2])
+    c2=PN.getchild(n2.edge[2])
+    if !(c1.leaf) && !(c2.leaf)
+    #println("p1,c1,p2,c2:$(p1.number),$(c1.number),$(p2.number),$(c2.number)")
+    f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
+    f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
+    #println("n2.edge[1].number,c1.number,c2.number: $(n2.edge[1].number),$(c1.number),$(c2.number)")
+    #println(f1)
+    #println(f2)
+    #println(f1+f2)
+
+    synth_e_dict[(0,p1.number,p2.number)]=string(f1+f2)
+    synth_e_dict[(0,p2.number,p1.number)]=string(f1+f2)
+    synth_e_dict[(n2.edge[1].number,p1.number,p2.number)]=string(f1+f2)
+    synth_e_dict[(n2.edge[1].number,p2.number,p1.number)]=string(f1+f2)
+
+    end
+else
+#println("Here?2")
+#println("n2: $n2")
+#println("edge: $edge")
+    p1=PN.getparent(n2.edge[1])
+    c1=PN.getchild(n2.edge[1])
+    p2=PN.getparent(n2.edge[2])
+    c2=PN.getchild(n2.edge[2])
+    if !(c1.leaf) && !(c2.leaf)
+#println("p1,c1,p2,c2:$(p1.number),$(c1.number),$(p2.number),$(c2.number)")
+    f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
+    f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
+#println("n2.edge[1].number,c1.number,c2.number: $(n2.edge[1].number),$(c1.number),$(c2.number)")
+#println("f1: $f1")
+#println("f2: $f2")
+#println(f1+f2)
+#try    
+#    println("(synth_e_dict[($(n2.edge[1].number),$(p1.number),$(c2.number))]: $(synth_e_dict[(n2.edge[1].number,p1.number,c2.number)])")
+#catch
+#    println("not yet the")
+#end
+    if (p1,c1)==(p2,c2)
+        synth_e_dict[(0,p1.number,c2.number)]=string(f1)
+        synth_e_dict[(0,c2.number,p1.number)]=string(f1)
+        synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1)
+        synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1)
+    else
+        synth_e_dict[(0,p1.number,c2.number)]=string(f1+f2)
+        synth_e_dict[(0,c2.number,p1.number)]=string(f1+f2)
+        synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2)
+        synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1+f2)
+    end
+
+#println("(synth_e_dict[($(n2.edge[1].number),$(p1.number),$(c2.number))]: $(synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2))")
+    end
 end
+#print("hehe1:")
+#PN.printEverything(net)
 
         PhyloNetworks.deleteEdge!(net,edge,part=false)
         # remove n2 as appropriate later (recursively)
+#print("hehe2:")
+#PN.printEverything(net)        
         Qdeleteleaf!(net, n2.number,synth_e_dict; index=false, nofuse=nofuse,
                     simplify=simplify, unroot=unroot, multgammas=multgammas,
                     keeporiginalroot=keeporiginalroot)
 
-#PN.printEverything(net)
+
     end
     if net.numHybrids != formernumhyb # deleteleaf! does not update containroot
         PhyloNetworks.allowrootbelow!(net)
