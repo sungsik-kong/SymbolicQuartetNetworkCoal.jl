@@ -1,8 +1,8 @@
 #test written by Sungsik Kong 2025
 using CSV
-using PhyloNetworks
 using DataFrames
 using FileCmp
+using PhyloNetworks
 using SymbolicQuartetNetworkCoal
 using Test
 

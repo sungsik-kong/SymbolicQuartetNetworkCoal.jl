@@ -1,9 +1,102 @@
 """
+    readTopologyrand(net; scaleparameter::Float64=1.0, decimalpoints::Integer=dpoints)
+
+Assigns randomized edge lengths and inheritance probabilities to a phylogenetic network.
+
+# Description
+The input can be provided either as:
+- a `PhyloNetworks.HybridNetwork` object, or
+- a Newick/Extended Newick string (which will be imported into a `PhyloNetworks.HybridNetwork`).
+
+The function assumes a **binary network** and produces a **non-ultrametric network** with dummy parameters
+that are suitable for testing or downstream processing, but not meant to represent realistic biological values.
+
+## Edge lengths
+- Each edge length is assigned as: `round(scaleparameter * rand(), digits=decimalpoints)`
+- By default, all edge lengths < scaleparameter.
+
+## Inheritance probabilities (gamma values)
+- For each hybrid node, two incoming edges are expected.
+- One edge is assigned a gamma value sampled uniformly from: `Uniform(1/nedge, 0.499)` where nedge is the number of edges in the network.
+- The other incoming edge is assigned the complementary probability: `1 - gamma`. Values are rounded to the specified number of decimalpoints.
+
+## Arguments
+- `net` A PhyloNetworks.HybridNetwork object or a Newick/Extended Newick string.
+- `scaleparameter::Float64=1.0` Multiplier applied to generated edge lengths.
+- `decimalpoints::Integer=dpoints` Number of decimal places for rounding (defaults to global dpoints).
+
+## Returns
+- A `PhyloNetworks.HybridNetwork` object with randomized edge lengths and inheritance probabilities.
+
+## Notes
+- This function will throw an error if any hybrid node does not have exactly two incoming edges.
+- The parameters generated are arbitrary placeholders and should not be interpreted as biologically realistic.
+"""
+function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer=dpoints)
+    #---------read in topology: input is either newick string or HybridNetwork object---------#
+    if net isa PhyloNetworks.HybridNetwork
+    else net=PhyloNetworks.readTopology(net) end
+
+    #--------generate arbitrary edge lengths--------#
+    for e in net.edge e.length=round(scaleparameter*(rand()),digits=decimalpoints) end #edge lengths <1, may be more realistic values
+    #for e in net.edge e.length=round((scaleparameter*(e.number+0.01)),digits=dpoints) end #this option makes it easier to keep track of elengths during debugging
+
+    #--------generaete arbitrary inheritance probabilities--------#
+    #----preambles----#
+    reticulatenodeindex=Int[]
+    nedge=length(net.edge)
+    nreticulate=net.numHybrids
+    gammavec=zeros(nreticulate)
+    #getting hybrid node index numbers
+    for n in net.node n.hybrid && push!(reticulatenodeindex,n.number) end
+    #check the number of hybrid nodes are counted correctly
+    length(reticulatenodeindex)==nreticulate || @error "Inheritance probability generation failed. Retry."
+    #generate arbitrary gamma values n=number of reticulation nodes (that will be assigned to one of the incoming edges)
+    mingam=parse(Float64,"0.$nedge")
+    for i in gammavec
+        i = round((mingam + rand() * (0.499 - mingam)), digits=decimalpoints)
+    end
+    #gammavec .= round.(rand(Uniform(parse(Float64,"0.$nedge"),0.499),nreticulate), digits=decimalpoints)
+    #assign inheritance probabilities to all reticulate edges
+    for (nthgamma, nodeidx) in enumerate(reticulatenodeindex)
+        # collect the incoming hybrid edges to this node
+        incoming = [e for e in net.edge if e.hybrid && PhyloNetworks.getchild(e).number == nodeidx]
+
+        if length(incoming) != 2
+            error("Hybrid node $nodeidx has $(length(incoming)) incoming edges (expected 2).")
+        end
+
+        incoming[1].gamma = gammavec[nthgamma]
+        incoming[2].gamma = round(1 - gammavec[nthgamma], digits=decimalpoints)
+    end
+    
+    #=
+    for nthgamma in 1:nreticulate
+        visits = 0
+        for e in net.edge
+            if e.hybrid && PhyloNetworks.getchild(e).number == reticulatenodeindex[nthgamma]
+                visits += 1
+                if visits == 1
+                    e.gamma = gammavec[nthgamma]
+                elseif visits == 2
+                    e.gamma = round(1 - gammavec[nthgamma], digits=dpoints)
+                else
+                    error("Hybrid node $(reticulatenodeindex[nthgamma]) has more than 2 incoming edges.")
+                end
+            end
+        end
+    end
+    =#
+
+    return net
+end
+
+"""
     aloha()
 
-Prints an ASCII art representation along with the text "Hawai'i-Five-O".
+Prints an ASCII art representation along with the text `Hawai'i-Five-O`.
 If you see the the Hawaiian "shaka" hand gesture, relax and take it easy, 
-because [SymbolicQuartetNetworkCoal.jl] is installed correctly.
+because your `SymbolicQuartetNetworkCoal.jl` is installed correctly.
 """
 function aloha()
     println(raw"""
@@ -28,33 +121,143 @@ function aloha()
                 Hawai'i-Five-O  """)
 end
 
+
+"""
+    parameterDictionary1(net, inheritancecorrelation; gammaSymbol::String="r")
+
+Creates a dictionary mapping inheritance probabilities (γ) and inheritance correlation (ρ) 
+in a phylogenetic network to symbolic labels.
+
+# Description
+This function generates a dictionary of symbolic parameter labels for use in 
+algebraic or likelihood-based calculations.
+
+- **Inheritance probabilities (γ):**  
+  For each hybrid node, the two incoming edges are assigned labels:
+  - `"$rLab{j}"` for the first edge  
+  - `"(1-$rLab{j})"` for the second edge  
+  where `j` is the index of the hybrid node (1-based).  
+  Each `γ` value is rounded to `dpoints` decimal places before being used as a dictionary key.
+
+- **Inheritance correlation (ρ):**  
+  The provided `inheritancecorrelation` value is assigned the label `"&rho"`.  
+  Its complement, `1 - ρ`, is rounded and assigned the label `"1-&rho"`.
+
+This function assumes each hybrid node has exactly two incoming edges, and will 
+throw an error otherwise.
+
+# Arguments
+- `net::PhyloNetworks.HybridNetwork`: The input network object.
+- `inheritancecorrelation::Float64`: The inheritance correlation value.
+- `gammaSymbol::String="r"`: Optional prefix for inheritance probability labels.
+
+# Returns
+- `Dict{Any, String}`: A dictionary mapping numerical parameter values to symbolic labels.
+"""
+function parameterDictionary1(net, inheritancecorrelation; gammaSymbol=rLab::String)
+    dict = Dict()
+
+    # Dictionary for inheritance probabilities (γ)
+    hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
+    for (j, hybNode) in enumerate(hybridNodeNumbers)
+        incoming = [e for e in net.edge if PhyloNetworks.getchild(e).number == hybNode]
+        if length(incoming) != 2
+            error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
+        end
+        for (k, e) in enumerate(incoming)
+            e.gamma = round(e.gamma, digits=dpoints)
+            dict[e.gamma] = k == 1 ? "$gammaSymbol{$j}" : "(1-$gammaSymbol{$j})"
+        end
+    end
+
+    # Inheritance correlation (ρ)
+    dict[inheritancecorrelation] = "&rho"
+    dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-&rho"
+    
+    return dict
+end
+
+
 """
     binary_to_tstring(binary_str::String) -> String
 
-Convert a binary string (e.g., "10101") into a string of positions prefixed by `t_` and joined by `-`.
+Convert a binary string (e.g., "10101") into a string of positions prefixed by the global constant eLab (`t_` by default) and joined by `-`.
 Each `1` in the binary string indicates a position, counted from the rightmost bit as position 1.
 
-Arguments:
+## Arguments:
 - binary_str::String : A string containing only '0' and '1'.
 
-Returns:
+## Returns:
 - String : A string representing positions of '1's in the form "t_1-t_3-...".
 
-Examples:
+## Examples:
 - binary_to_tstring("10101") # returns "t_5-t_3-t_1"
 - binary_to_tstring("0100") # returns "t_3"
 """
-function binary_to_tstring(binary_str::String)
+function binary_to_tstring(binary_str::String; edge_label=eLab::String)
     # Check that it's binary
-    #if any(c -> c != '0' && c != '1', binary_str)
-    #    error("Input must represent a binary number (e.g., 10101101).")
-    #end    
+    if any(c -> c != '0' && c != '1', binary_str)
+        error("Input must represent a binary number (e.g., 10101101).")
+    end    
     # Find positions with '1'
     t = length(binary_str)
     positions = [t - i + 1 for (i, c) in enumerate(binary_str) if c !== '0']
     # Join as required
-    return join(["t_{$i}" for i in positions], "-")
+    return join(["$edge_label{$i}" for i in positions], "-")
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
     binary(n::Int, binstr::String) -> String
@@ -105,139 +308,6 @@ end
 
 
 
-
-"""
-    parameterDictionary(net, inheritancecorrelation; tauSymbol="", gammaSymbol="")
-
-Creates a dictionary mapping parameter labels to values (edge lengths and inheritance probabilities) in a network.
-
-## Description
-This function generates a dictionary where:
-- **Edge lengths (`τ`)** are assigned symbolic labels (`t_{i}`).
-- **Inheritance probabilities (`γ`)** are assigned symbolic labels (`r_{j}`).
-- **Inheritance correlation (`ρ`)** is included as `&rho`, along with `1 - ρ`.
-
-For merged edges, symbolic names are assigned based on `mergedEdgeLengthandSymbolicName`.
-
-## Arguments
-- `net`: The input PhyloNetworks `HybridNetwork` object.
-- `inheritancecorrelation`: The inheritance correlation value, which is rounded and assigned a symbolic label.
-- `tauSymbol`: (Optional) Custom prefix for edge length symbols. Default is `"t_"`. [to be added in future versions]
-- `gammaSymbol`: (Optional) Custom prefix for inheritance probability symbols. Default is `"r_"`. [to be added in future versions]
-
-## Returns
-- A `Dict{Any, String}` mapping numerical values to symbolic parameter labels.
-"""
-function parameterDictionary(net, inheritancecorrelation; tauSymbol::String="t_", gammaSymbol::String="r_")
-    dict = Dict()
-    
-    # Dictionary for edge lengths (τ)
-    numEdges = length(net.edge)
-    allNetEdges = collect(1:numEdges)
-    for e in allNetEdges dict[net.edge[e].length] = "$tauSymbol{$e}" end
-    
-    #=termedgenum = [e.number for e in net.edge if PhyloNetworks.getchild(e).leaf]
-    maxMergedEdges = net.numTaxa + 2*(net.numHybrids) #max_edges_from_leaf_to_leaf(net)-2
-    for mergeRange in 1:maxMergedEdges
-        if mergeRange == 1
-            for e in allNetEdges
-                dict[net.edge[e].length] = "$tauSymbol{$e}"
-            end
-        else
-            edgeCombinations = collect(combinations(allNetEdges, mergeRange))
-            for edgeCombo in edgeCombinations
-                if isempty(intersect(edgeCombo, termedgenum))
-                    length, symbolicName = mergedEdgeLengthandSymbolicName(net, edgeCombo)
-                    dict[length] = symbolicName
-                end
-            end
-        end
-    end
-    =#
-    # Dictionary for inheritance probabilities (γ)
-    hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
-    for j in 1:net.numHybrids
-        hybNode = hybridNodeNumbers[j]
-        visitCount = 1
-        for e in net.edge
-            if PhyloNetworks.getchild(e).number == hybNode
-                e.gamma = round(e.gamma, digits=dpoints)
-                if visitCount == 1
-                    dict[e.gamma] = "$gammaSymbol{$j}"
-                    visitCount += 1
-                elseif visitCount == 2
-                    dict[e.gamma] = "(1-$gammaSymbol{$j})"
-                else
-                    error("Hybrid node $(hybNode) has more than 2 incoming edges.")
-                end
-            end
-        end
-    end
-    # Inheritance correlation (ρ)
-    inheritancecorrelation = round(inheritancecorrelation, digits=dpoints)
-    dict[inheritancecorrelation] = "&rho"
-    dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-&rho"
-    return dict
-end
-
-function parameterDictionary1(net, inheritancecorrelation; tauSymbol::String="t_", gammaSymbol::String="r_")
-    dict = Dict()
-    #numEdges = length(net.edge)
-    #allNetEdges = collect(1:numEdges)
-
-    
-    # Dictionary for inheritance probabilities (γ)
-    hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
-    for j in 1:net.numHybrids
-        hybNode = hybridNodeNumbers[j]
-        visitCount = 1
-        for e in net.edge
-            if PhyloNetworks.getchild(e).number == hybNode
-                e.gamma = round(e.gamma, digits=dpoints)
-                if visitCount == 1
-                    dict[e.gamma] = "$gammaSymbol{$j}"
-                    visitCount += 1
-                elseif visitCount == 2
-                    dict[e.gamma] = "(1-$gammaSymbol{$j})"
-                else
-                    error("Hybrid node $(hybNode) has more than 2 incoming edges.")
-                end
-            end
-        end
-    end
-    # Inheritance correlation (ρ)
-    #inheritancecorrelation = round(inheritancecorrelation, digits=dpoints)
-    dict[inheritancecorrelation] = "&rho"
-    dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-&rho"
-    return dict
-end
-
-"""
-    mergedEdgeLengthandSymbolicName(net::HybridNetwork, edgevec::Vector{Int})
-
-Computes the total edge length and generates a symbolic name for a given set of edges.
-
-## Description
-Given a vector of edge indices (`edgevec`) in a `HybridNetwork`, this function:
-- **Sums** the lengths of the specified edges.
-- **Constructs a symbolic name** in the form `"-t_{e1}-t_{e2}..."`.
-
-## Arguments
-- `net`: A `HybridNetwork` object.
-- `edgevec`: A vector containing edge indices.
-
-## Returns
-- length and symbolicName where:
-  - `length` is the total length of the selected edges (rounded to `dpoints`).
-  - `symbolicName` is a concatenated symbolic representation of these edges.
-"""
-function mergedEdgeLengthandSymbolicName(net::HybridNetwork, edgevec::Vector{Int})
-    total_length = sum(net.edge[e].length for e in edgevec)
-    symbolic_name = join(["-t_{$e}" for e in edgevec])
-    symbolic_name=chop(symbolic_name,head=1,tail=0)#remove the very first "-"
-    total_length = round(total_length, digits=dpoints)
-    return total_length, symbolic_name
-end
 
 """
     gettingSymbolicTopology(net::HybridNetwork, dict::Dict)
@@ -501,7 +571,6 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
                         unroot=unroot, multgammas=multgammas, keeporiginalroot=keeporiginalroot)
         end
     elseif !nofuse
-
         e1 = Qfuseedgesat!(i,net, synth_e_dict,multgammas) # fused edge
         if simplify && e1.hybrid # check for 2-cycle at new hybrid edge
             cn = PhyloNetworks.getchild(e1)
@@ -542,7 +611,7 @@ function Qfuseedgesat!(i::Integer, net::HybridNetwork, synth_e_dict, multgammas=
 pen=pe.number
 pep=PN.getparent(pe).number
 pec=PN.getchild(pe).number
-pee=deepcopy(pe)
+#pee=deepcopy(pe)
     ce = nodei.edge[j==1 ? 2 : 1]
 cee=deepcopy(ce)
     if pe.hybrid       # unless it's a hybrid: should be --tree--> node i --hybrid-->
@@ -579,14 +648,10 @@ p=PN.getparent(ce).number
 c=PN.getchild(ce).number
 f1=parse(BigInt,synth_e_dict[(cee.number,PN.getparent(cee).number,PN.getchild(cee).number)])
 f2=parse(BigInt,synth_e_dict[(pen,pep,pec)])
-#println("parse(BigInt,synth_e_dict[($(cee.number),$(PN.getparent(cee).number),$(PN.getchild(cee).number))])==$f1")
-#println("parse(BigInt,synth_e_dict[($pen,$pep,$pec)])==$f2")
-synth_e_dict[(0,p,c)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
-synth_e_dict[(0,c,p)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(ce.number,p,c)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(ce.number,c,p)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
-#println("synth_e_dict[(ce.number,c,p)]=string(f1+f2): synth_e_dict[($(ce.number),$p,$c)]=string($(f1+f2))")
 end    
+
     return ce
 end
 
@@ -600,7 +665,6 @@ function Qdeletehybridedge!(
     simplify::Bool=true,
     keeporiginalroot::Bool=false
 )
-
     edge.hybrid || error("edge $(edge.number) has to be hybrid for deletehybridedge!")
     n1 = getchild(edge)  # child of edge, to be deleted unless nofuse
     n1.hybrid || error("child node $(n1.number) of hybrid edge $(edge.number) should be a hybrid.")
@@ -634,26 +698,22 @@ function Qdeletehybridedge!(
         if multgammas
             ce.gamma = PhyloNetworks.multiplygammas(ce.gamma, pe.gamma)
         end
-#println("ce1:$ce")
+
 ce1=deepcopy(ce)
-#println("pe1:$pe")
 pe1=deepcopy(pe)
 
         PhyloNetworks.removeNode!(n1,ce) # ce now has 1 single node cn
         PhyloNetworks.setNode!(ce,pn)    # ce now has 2 nodes in this order: cn, pn
         ce.isChild1 = true
         PhyloNetworks.setEdge!(pn,ce)
-#println("ce2:$ce")
-if !(PN.getchild(ce).leaf) 
 
+if !(PN.getchild(ce).leaf) 
 f1=parse(BigInt,synth_e_dict[(pe1.number,PN.getparent(pe1).number, PN.getchild(pe1).number)])
 f2=parse(BigInt,synth_e_dict[(ce1.number,PN.getparent(ce1).number, PN.getchild(ce1).number)])
-synth_e_dict[(0,PN.getparent(pe).number,PN.getchild(ce).number)]=string(f1+f2)
-synth_e_dict[(0,PN.getchild(ce).number,PN.getparent(pe).number)]=string(f1+f2)
 synth_e_dict[(ce.number,PN.getparent(pe).number,PN.getchild(ce).number)]=string(f1+f2)
 synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(pe).number)]=string(f1+f2)
-
 end
+
         PhyloNetworks.removeEdge!(pn,pe)
         # if (pe.number<ce.number) ce.number = pe.number; end # bad to match edges between networks
         PhyloNetworks.removeEdge!(n1,pe); PhyloNetworks.removeEdge!(n1,ce) # now n1 attached to edge only
@@ -670,7 +730,6 @@ end
         # below: we will need to delete n1 recursively (hence edge)
     else # n1 has 4+ edges (polytomy) or 3 edges but we want to keep it anyway:
         # keep n1 but detach it from 'edge', set its remaining parent to major tree edge
-
         pe = getpartneredge(edge, n1) # partner edge: keep it this time
         if !pe.isMajor pe.isMajor=true; end
         pe.hybrid = false
@@ -696,86 +755,51 @@ end
     elseif n2degree == 1
         error("node $(n2.number) (parent of hybrid edge $(edge.number) to be deleted) has 1 edge only!")
     else
-#print("n2: $(n2)")  
-#print("n2.edge: $(n2.edge)")  
+
         # fixit: if n2degree == 2 && n2 === net.node[net.rooti] and
         #        if we want to keep original root: then delete edge but keep n2
         # detach n2 from edge, remove hybrid 'edge' from network
-
-
         PhyloNetworks.removeEdge!(n2,edge)
 
-#PN.printEverything(net)
-
 if n2.hybrid
-    #println("Here?1")
     p1=PN.getparent(n2.edge[1])
     c1=PN.getchild(n2.edge[1])
     p2=PN.getparent(n2.edge[2])
     c2=PN.getchild(n2.edge[2])
     if !(c1.leaf) && !(c2.leaf)
-    #println("p1,c1,p2,c2:$(p1.number),$(c1.number),$(p2.number),$(c2.number)")
     f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
     f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
-    #println("n2.edge[1].number,c1.number,c2.number: $(n2.edge[1].number),$(c1.number),$(c2.number)")
-    #println(f1)
-    #println(f2)
-    #println(f1+f2)
-
-    synth_e_dict[(0,p1.number,p2.number)]=string(f1+f2)
-    synth_e_dict[(0,p2.number,p1.number)]=string(f1+f2)
+    #synth_e_dict[(0,p1.number,p2.number)]=string(f1+f2)
+    #synth_e_dict[(0,p2.number,p1.number)]=string(f1+f2)
     synth_e_dict[(n2.edge[1].number,p1.number,p2.number)]=string(f1+f2)
     synth_e_dict[(n2.edge[1].number,p2.number,p1.number)]=string(f1+f2)
-
     end
 else
-#println("Here?2")
-#println("n2: $n2")
-#println("edge: $edge")
     p1=PN.getparent(n2.edge[1])
     c1=PN.getchild(n2.edge[1])
     p2=PN.getparent(n2.edge[2])
     c2=PN.getchild(n2.edge[2])
     if !(c1.leaf) && !(c2.leaf)
-#println("p1,c1,p2,c2:$(p1.number),$(c1.number),$(p2.number),$(c2.number)")
     f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
     f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
-#println("n2.edge[1].number,c1.number,c2.number: $(n2.edge[1].number),$(c1.number),$(c2.number)")
-#println("f1: $f1")
-#println("f2: $f2")
-#println(f1+f2)
-#try    
-#    println("(synth_e_dict[($(n2.edge[1].number),$(p1.number),$(c2.number))]: $(synth_e_dict[(n2.edge[1].number,p1.number,c2.number)])")
-#catch
-#    println("not yet the")
-#end
-    if (p1,c1)==(p2,c2)
-        synth_e_dict[(0,p1.number,c2.number)]=string(f1)
-        synth_e_dict[(0,c2.number,p1.number)]=string(f1)
-        synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1)
-        synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1)
-    else
-        synth_e_dict[(0,p1.number,c2.number)]=string(f1+f2)
-        synth_e_dict[(0,c2.number,p1.number)]=string(f1+f2)
-        synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2)
-        synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1+f2)
-    end
-
-#println("(synth_e_dict[($(n2.edge[1].number),$(p1.number),$(c2.number))]: $(synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2))")
+        if (p1,c1)==(p2,c2)
+            #synth_e_dict[(0,p1.number,c2.number)]=string(f1)
+            #synth_e_dict[(0,c2.number,p1.number)]=string(f1)
+            synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1)
+            synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1)
+        else
+            #synth_e_dict[(0,p1.number,c2.number)]=string(f1+f2)
+            #synth_e_dict[(0,c2.number,p1.number)]=string(f1+f2)
+            synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2)
+            synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1+f2)
+        end
     end
 end
-#print("hehe1:")
-#PN.printEverything(net)
-
         PhyloNetworks.deleteEdge!(net,edge,part=false)
-        # remove n2 as appropriate later (recursively)
-#print("hehe2:")
-#PN.printEverything(net)        
+        # remove n2 as appropriate later (recursively)   
         Qdeleteleaf!(net, n2.number,synth_e_dict; index=false, nofuse=nofuse,
                     simplify=simplify, unroot=unroot, multgammas=multgammas,
                     keeporiginalroot=keeporiginalroot)
-
-
     end
     if net.numHybrids != formernumhyb # deleteleaf! does not update containroot
         PhyloNetworks.allowrootbelow!(net)

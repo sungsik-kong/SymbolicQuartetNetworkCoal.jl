@@ -6,17 +6,17 @@ module SymbolicQuartetNetworkCoal
     using PhyloNetworks
     using StaticArrays
     import Random
-    using Distributions
     using Logging        
-    #global_logger(ConsoleLogger(stderr, Debug))
 
     const dpoints=3 #decimal points for all parameters when randomly generated
     const eLab="t_"
+    const rLab="r_"
     const PN = PhyloNetworks
 
     export
     aloha,
     export_csv,
+    reformat_export,
     readTopologyrand,
     network_expectedCF_formulas,
     makeEdgeLabel,
@@ -24,7 +24,6 @@ module SymbolicQuartetNetworkCoal
         
     include("misc.jl")
     include("symbolicQNC.jl")
-    include("topology.jl")
     include("reformatting.jl")    
 
 end # module
