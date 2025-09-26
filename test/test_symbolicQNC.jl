@@ -4,7 +4,7 @@ const rLab="r_"
 const dpoints=3
 
 @testset begin
-    threshold=0.001 #we want the absolute difference between the true and computed values to be <threshold
+    threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
     ih=0.1 #inheritancecorrelation
     filename=["topologies_n5_l1.txt","topologies_n5_l2.txt"]
     count1=0

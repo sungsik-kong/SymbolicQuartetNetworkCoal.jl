@@ -52,9 +52,11 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer
     #check the number of hybrid nodes are counted correctly
     length(reticulatenodeindex)==nreticulate || @error "Inheritance probability generation failed. Retry."
     #generate arbitrary gamma values n=number of reticulation nodes (that will be assigned to one of the incoming edges)
-    mingam=parse(Float64,"0.$nedge")
-    for i in gammavec
-        i = round((mingam + rand() * (0.499 - mingam)), digits=decimalpoints)
+    mingam=0.01*nedge
+    j=0
+    for i in 1:nreticulate
+        j+=1
+        gammavec[i] = round((mingam+(0.01*j)), digits=decimalpoints)
     end
     #gammavec .= round.(rand(Uniform(parse(Float64,"0.$nedge"),0.499),nreticulate), digits=decimalpoints)
     #assign inheritance probabilities to all reticulate edges
