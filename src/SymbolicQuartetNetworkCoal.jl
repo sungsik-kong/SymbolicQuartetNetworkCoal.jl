@@ -1,5 +1,4 @@
 module SymbolicQuartetNetworkCoal
-    using Combinatorics
     using CSV
     using DataFrames
     using Dates
