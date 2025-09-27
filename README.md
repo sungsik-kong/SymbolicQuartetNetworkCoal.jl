@@ -165,7 +165,7 @@ Then we see:
 Finally, the dataframe that contains all split and either numerical or symbolic equations can be reformatted for subsequent analysis using different programs. Function `function reformat_export()` takes the input network and the formula dataframe as input and can export it into a `csv` file or reformat it for use in `Macaulay` (for Grobner basis, multigraded implicitization) and `Matlab`. For example,
 
 ```@julia
-julia> reformat_export(net,df, macaulay=true, multigraded=false, matlab=true, csv=false, filename="sqnc--")
+julia> reformat_export(net,df, macaulay=true, multigraded=false, matlab=true, csv=false)
 ```
 
 will create two new files in the working folder: `sqnc_output_macaulay.m2` and `sqnc_output_matlab.m`. Below shows a peek of the former file:
