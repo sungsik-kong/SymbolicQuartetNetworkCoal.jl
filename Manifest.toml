@@ -2,7 +2,7 @@
 
 julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "e198481d23fd2d9ca1f3cce3fbc217d691d1b042"
+project_hash = "15d0fb4315f2a6a0fbb8995ee715a68421e0e855"
 
 [[deps.AliasTables]]
 deps = ["PtrArrays", "Random"]
@@ -56,6 +56,28 @@ deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers
 git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
+
+[[deps.CategoricalArrays]]
+deps = ["Compat", "DataAPI", "Future", "Missings", "Printf", "Requires", "Statistics", "Unicode"]
+git-tree-sha1 = "80ccd62b060efe8ff65d4edd4fa1ce9f653ae411"
+uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
+version = "1.0.1"
+
+    [deps.CategoricalArrays.extensions]
+    CategoricalArraysArrowExt = "Arrow"
+    CategoricalArraysJSONExt = "JSON"
+    CategoricalArraysRecipesBaseExt = "RecipesBase"
+    CategoricalArraysSentinelArraysExt = "SentinelArrays"
+    CategoricalArraysStatsBaseExt = "StatsBase"
+    CategoricalArraysStructTypesExt = "StructTypes"
+
+    [deps.CategoricalArrays.weakdeps]
+    Arrow = "69666777-d1a9-59fb-9406-91d4454c9d45"
+    JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SentinelArrays = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+    StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+    StructTypes = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -413,6 +435,12 @@ git-tree-sha1 = "66c2a637bd4d4e7064b60c0e5a0e6db2db3116a1"
 uuid = "33ad39ac-ed31-50eb-9b15-43d0656eaa72"
 version = "0.16.4"
 
+[[deps.PhyloPlots]]
+deps = ["DataFrames", "Markdown", "PhyloNetworks", "Printf", "RCall"]
+git-tree-sha1 = "d5bbd312187c3844f575ed4483b88c461bd4aaec"
+uuid = "c0d5b6db-e3fc-52bc-a87d-1d050989ed3b"
+version = "1.0.1"
+
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -468,6 +496,18 @@ version = "2.11.2"
     [deps.QuadGK.weakdeps]
     Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 
+[[deps.RCall]]
+deps = ["CategoricalArrays", "Conda", "DataFrames", "DataStructures", "Dates", "Libdl", "Preferences", "REPL", "Random", "StatsModels", "WinReg"]
+git-tree-sha1 = "7521292e0ca900751cf0f35f2a2faf1cb321e960"
+uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
+version = "0.14.9"
+
+    [deps.RCall.extensions]
+    RCallAxisArraysExt = ["AxisArrays"]
+
+    [deps.RCall.weakdeps]
+    AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
+
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
@@ -482,6 +522,12 @@ version = "1.11.0"
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
+
+[[deps.Requires]]
+deps = ["UUIDs"]
+git-tree-sha1 = "62389eeff14780bfe55195b7204c0d8738436d64"
+uuid = "ae029012-a4dd-5104-9daa-d747884805df"
+version = "1.3.1"
 
 [[deps.Rmath]]
 deps = ["Random", "Rmath_jll"]
@@ -688,6 +734,11 @@ deps = ["DataAPI", "InlineStrings", "Parsers"]
 git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
 uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
 version = "1.4.2"
+
+[[deps.WinReg]]
+git-tree-sha1 = "cd910906b099402bcc50b3eafa9634244e5ec83b"
+uuid = "1b915085-20d7-51cf-bf83-8f477d6f5128"
+version = "1.0.0"
 
 [[deps.WorkerUtilities]]
 git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"

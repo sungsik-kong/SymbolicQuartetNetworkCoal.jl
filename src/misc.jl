@@ -97,7 +97,7 @@ end
     aloha()
 
 Prints an ASCII art representation along with the text `Hawai'i-Five-O`.
-If you see the the Hawaiian "shaka" hand gesture, relax and take it easy, 
+If you see the Hawaiian "shaka" hand gesture, relax and take it easy, 
 because your `SymbolicQuartetNetworkCoal.jl` is installed correctly.
 """
 function aloha()
@@ -120,7 +120,7 @@ function aloha()
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ 
-                Hawai'i-Five-O  """)
+               Hawai'i-Five-O""")
 end
 
 

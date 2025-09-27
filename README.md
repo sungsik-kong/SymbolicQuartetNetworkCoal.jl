@@ -2,7 +2,7 @@
 
 Aloha!
 
-`SymbolicQuartetNetworkCoal.jl` is a Julia package that provides useful functions to study identifiability of phylogenetic trees and networks using quartet concordance factors with techniques from algebraic statistics. This package is constructed by extending another Julia package `QuartetNetworkGoodnessFit`, aka "Quarnet GoF" or simply "QGoF" (https://github.com/JuliaPhylo/QuartetNetworkGoodnessFit.jl).
+`SymbolicQuartetNetworkCoal.jl` or simply "SymCF" is a Julia package that provides useful functions for studying mathematical identifiability of phylogenetic tree and network parameters using quartet concordance factors with techniques from algebraic statistics. This package is constructed by extending another Julia package `QuartetNetworkGoodnessFit` (available at https://github.com/JuliaPhylo/QuartetNetworkGoodnessFit.jl).
 
 ## Installation
 
@@ -19,12 +19,11 @@ To make sure the package is installed correctly, try the following:
 julia> using SymbolicQuartetNetworkCoal
 
 julia> aloha()
-
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⠂⢀⡀⠀⢀⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣤⣄⣠⣀⠀⠘⠋⠉⠉⠁⠀⠺⣿⡷⣿⣿⣿⡿⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⣛⠛⠉⠀⠀⠀⠀⠺⣷⣦⠀⠀⠀⠙⠛⠉⠀⠀⠈⣿⣦⣤⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣆⠀⠈⠉⠁⠀⠀⠀⠀⠀⠀⠀⠙⠉⠀⠀⢸⣦⠀⠀⠀⢀⣼⣿⣿⣿⣿⣷⡄⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢺⣿⣿⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⣧⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢺⣿⣿⡿⠁⠀⠀⠀ ⠀⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⣧⡀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⢀⡆⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣷⠄⠀⠀⠀⠀⠀
 ⢠⣾⣷⣦⡀⠘⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⢠⣿⣿⣿⡿⠟⠛⠋⠁⣀⣠⣤⣄⣀⠀
 ⠘⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⣾⣶⣿⣿⣿⣿⣿⣿⣟⠘⣿⣷⡀⠀⠀⠘⠿⡿⠉⠀⠀⣀⣴⣾⣿⣿⣿⣿⡿⡂
@@ -37,228 +36,154 @@ julia> aloha()
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣿⣷⣦⣄⣀⣤⣾⣿⣿⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ Hawai'i-Five-O
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ 
+                   Hawai'i-Five-O  
 ```
-You should be able to see the Shaka! 
+If you see the Hawaiian "shaka" hand gesture, relax and take it easy, because your SymbolicQuartetNetworkCoal.jl is installed correctly.
+
 
 ## Input and output
-  - **Input**: A network topology (with four or more taxa) written in extended Newick format, with or without parameters specified.
-  - **Output**: Numerical or symbolic formulas to compute the quartet concordance factors (CFs) under the network multispecies coalescent for each quartet topology extracted from the input network.
-  
+  - **Input**: A tree/network topology (with four or more taxa) in Newick/extended Newick format, respectively, with or without parameters (edge lengths and inheritance probabilities) specified.
+  - **Output**: Numerical or symbolic formulas to compute concordance factors (CFs) under the network multispecies coalescent for each quartet topology extracted from the input. Optional transformation of those formulas is also available for interoperability with other mathematical tools like Macaulay2 or Matlab. 
+
 ## Main functions
-### Full parametrized topology with random values
+### Assign arbitrary parameter values to input topology
 
-The function `readTopologyrand()` topology imports a (extended) Newick string or a text file that contains a (extended) Newick string in the first line and assigns randomized edge lengths and inheritance probabilities. It results in a non-ultrametric topology. This function is useful when the parameters in the given topology are not or partially available, as we need fully parametrized topologies to obtain the set of formulas.
-
-Briefly, the n^th edge that appears in the Newick topology will have the length of n plus a random value drawn from the uniform distribution of U(0,1). The depth of the entire topology can controlled using the optional argument `scaleparameter` that multiplies the generated edge lengths to the specified value. The default value of `scaleparameter` is `1`. The inheritance probability is drawn from the uniform distribution of U(0,1).
-
+All parameters in the input network must be specified. If necessary, the function `readTopologyrand()` can import an (extended) Newick string and assign randomized edge lengths and inheritance probabilities. This is especially useful when the goal is to generate symbolic formulas from an arbitrary network topolgoy. See the example below:
 ```@julia
-julia> net=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));")
+julia> net=readTopologyrand("(((((b,c),((d,e))#H6))#H2,#H2),(a,#H6));")
 PhyloNetworks.HybridNetwork, Rooted Network
-20 edges
-19 nodes: 8 tips, 2 hybrid nodes, 9 internal tree nodes.
-tip labels: C, A, G, H, ...
-((C:1.447,A:2.341):3.512,(((G:4.325,H:5.036):6.06,(((E:7.226,F:8.802):9.386)#H2:10.989::0.509)#H1:11.467::0.889):12.585,((#H2:13.222::0.491,(B:14.527,D:15.871):16.692):17.377,#H1:18.815::0.111):19.026):20.727);
-
-julia> net=SymbolicQuartetNetworkCoal.readTopologyrand("((C,A),(((G,H),(((E,F))#H2)#H1),((#H2,(B,D)),#H1)));",scaleparameter=0.1)
-PhyloNetworks.HybridNetwork, Rooted Network
-20 edges
-19 nodes: 8 tips, 2 hybrid nodes, 9 internal tree nodes.
-tip labels: C, A, G, H, ...
-((C:0.164,A:0.282):0.307,(((G:0.415,H:0.561):0.657,(((E:0.713,F:0.89):0.944)#H2:1.046::0.634)#H1:1.102::0.813):1.23,((#H2:1.393::0.366,(B:1.435,D:1.595):1.63):1.767,#H1:1.83::0.187):1.995):2.023);
+14 edges
+13 nodes: 5 tips, 2 hybrid nodes, 6 internal tree nodes.
+tip labels: b, c, d, e, ...
+(((((b:0.867,c:0.494):0.342,((d:0.486,e:0.649):0.09)#H6:0.966::0.15):0.306)#H2:0.355::0.16,#H2:0.655::0.84):0.815,(a:0.709,#H6:0.826::0.85):0.038);
 ```
-Notice the edge lengths of the bottom network are roughly 1/10 of the top network since we set `scaleparameter=0.1`.
 
-### Formulas for expected quartet CFs
-
-The function `network_expectedCF_formulas` is the core function that produces the quartet CFs for each quartet in the input topology. When this function is executed *only* with the network topology provided (i.e., without specifying any of the optional arguments), it performs the identical procedure as `network_expectedCF` function in `QuartetNetworkGoodnessFit`. The arguments that can be specified to perform the functions available in `SymbolicQuartetNetworkCoal` are:
+## Formulas for expected quartet CFs
+The function `network_expectedCF_formulas()` is the core function that produces the formulas for CFs for each quartet in the input topology. There are four arguments:
 
 - Mandatory argument
-  - Network topology written in Newick 
-
+  - `network`: A phylogenetic network in PhyloNetworks.HybridNetwork format. All parameters should be specified.
+ 
 - Optional arguments
-  - `network::HybridNetwork`: A phylogenetic network from the PhyloNetworks package, with edge lengths in coalescent units and γ values for hybrid edges.
-  - `showprogressbar::Bool=true`: If true, displays a progress bar for quartet calculations.
-  - `inheritancecorrelation::Number=0`: Correlation between inheritance probabilities at hybrid nodes (must be between 0 and 1).
-  - `filename::AbstractString="symbolicQNC-HFO-out"`: Base name for output files (e.g., log, CSV, Macaulay2, MATLAB).
-  - `symbolic::Bool=false`: If true, computes CFs as symbolic expressions; requires all edge parameters to be defined or assigns random values.
-  - `savecsv::Bool=false`: If true, saves CFs to a CSV file named `<filename>.csv`.
-  - `macaulay::Bool=false`: If true, generates a Macaulay2 script (`<filename>.m2.txt`) for symbolic analysis; requires `symbolic=true`.
-  - `matlab::Bool=false`: If true, generates a MATLAB script (`<filename>.matlab.txt`) for symbolic analysis; requires `symbolic=true`.
-  - `multigraded::Bool=false`: If true, generates a Macaulay2 multigraded implicitization script (`<filename>.im.m2.txt`); requires `symbolic=true`.
+  - `showprogressbar` (default `false`): If true, displays a progress bar for quartet calculations.
+  - `inheritancecorrelation` (default `0.0`): Correlation between inheritance probabilities at hybrid nodes (must be between 0 and 1).
+  - `symbolic` (default `false`): If true, computes CFs as symbolic expressions.
 
--Returns:
-  - `quartet::Vector{PhyloNetworks.QuartetT}`: Array of QuartetT objects containing quartet indices, taxa, and CFs (numerical or symbolic).
-  - `taxa::Vector{String}`: Sorted list of taxon names from the network.
+- Returns:
+  - `quartet`: Array of QuartetT objects containing quartet indices, taxa, and CFs (numerical or symbolic).
+  - `taxa`: Sorted list of taxon names from the network.
+  - `formula`: A two column Dataframe where the first column is the split and the second column is the formula for the corresponding split.
 
-#### Numerical formulas
+Below provides an example workflow.
 
 ```@julia
-julia> network_expectedCF_formulas(net,inheritancecorrelation=0)```
-
-SymbolicQuartetNetworkCoal.jl log
-Timestamp: 2025-02-24T18:45:18.762
-------------------------
-General setting: 
-Symbolic option: off
-Store output in .csv file: off
-Write Matlab file: off
-Write Macaulay2 file: off
-------------------------
-Topology:
-((C:1.85113,A:2.4774289):3.5732234,(((G:4.2852874,H:5.1839555):6.9904621,(((E:7.0906201,F:8.5153955):9.0431873)#H2:10.4526595::0.1021757)#H1:11.0652352::0.7983348):12.2439055,((#H2:13.0069595::0.8978243,(B:14.8312632,D:15.7456604):16.0949443):17.4547141,#H1:18.3397273::0.2016652):19.5821649):20.5231182);
-((C:t_{1},A:t_{2}):t_{3},(((G:t_{4},H:t_{5}):t_{6},(((E:t_{7},F:t_{8}):t_{9})#H2:t_{10}::r_{1})#H1:11-&rho652352::r_{2}):t_{12},((#H2:t_{13}::(1-r_{1}),(B:t_{14},D:t_{15}):t_{16}):t_{17},#H1:t_{18}::(1-r_{2})):t_{19}):t_{20});
-------------------------
-Parameters:
-Parameter		Value
-t_{1}		1.85113
-t_{2}		2.4774289
-t_{3}		3.5732234
-t_{4}		4.2852874
-t_{5}		5.1839555
-t_{6}		6.9904621
-t_{7}		7.0906201
-t_{8}		8.5153955
-t_{9}		9.0431873
-t_{10}		10.4526595
-r_{1}		0.1021757
-t_{11}		11.0652352
-r_{2}		0.7983348
-t_{12}		12.2439055
-t_{13}		13.0069595
-(1-r_{1})		0.8978243
-t_{14}		14.8312632
-t_{15}		15.7456604
-t_{16}		16.0949443
-t_{17}		17.4547141
-t_{18}		18.3397273
-(1-r_{2})		0.2016652
-t_{19}		19.5821649
-t_{20}		20.5231182
-&rho		0
-------------------------
-Concordance factor:
-Quartet		Formula
-AB|CD		(exp(-77.2281649)/3)
-AC|BD		(1-2*exp(-77.2281649)/3)
-AD|BC		(exp(-77.2281649)/3)
-.
-.
-.
+julia> quartet,taxa,df=network_expectedCF_formulas(net)
+(PhyloNetworks.QuartetT{StaticArraysCore.MVector{3, Float64}}[4-taxon set number 1; taxon numbers: 1,2,3,4
+data: [0.09623522169452775, 0.09623522169452775, 0.8075295566109444], 4-taxon set number 2; taxon numbers: 1,2,3,5
+data: [0.09623522169452775, 0.09623522169452775, 0.8075295566109444], 4-taxon set number 3; taxon numbers: 1,2,4,5
+data: [0.6270609492230116, 0.1864695253884942, 0.1864695253884942], 4-taxon set number 4; taxon numbers: 1,3,4,5
+data: [0.6270609492230116, 0.1864695253884942, 0.1864695253884942], 4-taxon set number 5; taxon numbers: 2,3,4,5
+data: [0.8374135700836132, 0.08129321495819346, 0.08129321495819346]], ["a", "b", "c", "d", "e"], 15×2 DataFrame
+ Row │ Split   CF                                
+     │ String  String                            
+─────┼───────────────────────────────────────────
+   1 │ ab|cd   ((exp(-0.0049229353)/3)*0.15+(((…
+   2 │ ac|bd   ((exp(-0.0049229353)/3)*0.15+(((…
+   3 │ ad|bc   ((1-2*exp(-0.0049229353)/3)*0.15…
+   4 │ ab|ce   ((exp(-0.0049229353)/3)*0.15+(((…
+   5 │ ac|be   ((exp(-0.0049229353)/3)*0.15+(((…
+   6 │ ae|bc   ((1-2*exp(-0.0049229353)/3)*0.15…
+   7 │ ab|de   ((1-exp(-0.3176448462))+(((exp(-…
+   8 │ ad|be   ((((exp(-0.3176448462)*0.15)*(0.…
+   9 │ ae|bd   ((((exp(-0.3176448462)*0.15)*(0.…
+  10 │ ac|de   ((1-exp(-0.3176448462))+(((exp(-…
+  11 │ ad|ce   ((((exp(-0.3176448462)*0.15)*(0.…
+  12 │ ae|cd   ((((exp(-0.3176448462)*0.15)*(0.…
+  13 │ bc|de   ((1-exp(-0.3176448462))+(((exp(-…
+  14 │ bd|ce   ((((exp(-0.3176448462)*0.15)*(0.…
+  15 │ be|cd   ((((exp(-0.3176448462)*0.15)*(0.…)
 ```
+Note that it produces numerical equations given the parameters in the input network by default. Setting an optional argument `symbolic=true` will produce a set of symbolic equations.
 
 ```@julia
-julia> network_expectedCF(net,savecsv=true)
+julia> quartet,taxa,df=network_expectedCF_formulas(net,symbolic=true)
+(PhyloNetworks.QuartetT{StaticArraysCore.MVector{3, Float64}}[4-taxon set number 1; taxon numbers: 1,2,3,4
+data: [0.09623522169452775, 0.09623522169452775, 0.8075295566109444], 4-taxon set number 2; taxon numbers: 1,2,3,5
+data: [0.09623522169452775, 0.09623522169452775, 0.8075295566109444], 4-taxon set number 3; taxon numbers: 1,2,4,5
+data: [0.6270609492230116, 0.1864695253884942, 0.1864695253884942], 4-taxon set number 4; taxon numbers: 1,3,4,5
+data: [0.6270609492230116, 0.1864695253884942, 0.1864695253884942], 4-taxon set number 5; taxon numbers: 2,3,4,5
+data: [0.8374135700836132, 0.08129321495819346, 0.08129321495819346]], ["a", "b", "c", "d", "e"], 15×2 DataFrame
+ Row │ Split   CF                                
+     │ String  String                            
+─────┼───────────────────────────────────────────
+   1 │ ab|cd   ((exp(-t_{3})/3)*r_{1}+((((exp(-…
+   2 │ ac|bd   ((exp(-t_{3})/3)*r_{1}+((((exp(-…
+   3 │ ad|bc   ((1-2*exp(-t_{3})/3)*r_{1}+((1-e…
+   4 │ ab|ce   ((exp(-t_{3})/3)*r_{1}+((((exp(-…
+   5 │ ac|be   ((exp(-t_{3})/3)*r_{1}+((((exp(-…
+   6 │ ae|bc   ((1-2*exp(-t_{3})/3)*r_{1}+((1-e…
+   7 │ ab|de   ((1-exp(-t_{6}))+(((exp(-t_{6})*…
+   8 │ ad|be   ((((exp(-t_{6})*r_{1})*(r_{1}*(1…
+   9 │ ae|bd   ((((exp(-t_{6})*r_{1})*(r_{1}*(1…
+  10 │ ac|de   ((1-exp(-t_{6}))+(((exp(-t_{6})*…
+  11 │ ad|ce   ((((exp(-t_{6})*r_{1})*(r_{1}*(1…
+  12 │ ae|cd   ((((exp(-t_{6})*r_{1})*(r_{1}*(1…
+  13 │ bc|de   ((1-exp(-t_{6}))+(((exp(-t_{6})*…
+  14 │ bd|ce   ((((exp(-t_{6})*r_{1})*(r_{1}*(1…
+  15 │ be|cd   ((((exp(-t_{6})*r_{1})*(r_{1}*(1…)
 ```
 
-#### Symbolic formulas
-```@julia
-julia> julia> network_expectedCF(net,savecsv=true,symbolic=true)
-```
+### Visualizing topology with symbolic names
+Since the symbolic names were chosen internally, it is difficult to know which edge name (e.g., t_{1}) corresponds to which edge in the input network. By combining function `makeEdgeLabel` and Julia package `PhyloPlots`, we can visualize the edge names on a topology. Setting an optional argument `showTerminalEdgeLabels=false` does not label terminal edges since they are not used for CF computation. An example workflow is demonstrated below.
 
-```
-SymbolicQuartetNetworkCoal.jl log
-Timestamp: 2025-02-24T18:46:51.858
-------------------------
-General setting: 
-Symbolic option: on
-Store output in .csv file: on
-Write Matlab file: off
-Write Macaulay2 file: off
-------------------------
-Topology:
-((C:1.7566785,A:2.9934842):3.1356123,(((G:4.551512,H:5.1216977):6.8029044,(((E:7.3012429,F:8.3767442):9.6975132)#H2:10.7946048::0.2514125)#H1:11.5440906::0.7356495):12.5929871,((#H2:13.9026236::0.7485875,(B:14.9021465,D:15.328871):16.1521944):17.0057032,#H1:18.8169413::0.2643505):19.5466342):20.6892273);
-((C:t_{1},A:t_{2}):t_{3},(((G:t_{4},H:t_{5}):t_{6},(((E:t_{7},F:t_{8}):t_{9})#H2:t_{10}::r_{1})#H1:t_{11}::r_{2}):t_{12},((#H2:t_{13}::(1-r_{1}),(B:t_{14},D:t_{15}):t_{16}):t_{17},#H1:t_{18}::(1-r_{2})):t_{19}):t_{20});
-------------------------
-Parameters:
-Parameter		Value
-t_{1}		1.7566785
-t_{2}		2.9934842
-t_{3}		3.1356123
-t_{4}		4.551512
-t_{5}		5.1216977
-t_{6}		6.8029044
-t_{7}		7.3012429
-t_{8}		8.3767442
-t_{9}		9.6975132
-t_{10}		10.7946048
-r_{1}		0.2514125
-t_{11}		11.5440906
-r_{2}		0.7356495
-t_{12}		12.5929871
-t_{13}		13.9026236
-(1-r_{1})		0.7485875
-t_{14}		14.9021465
-t_{15}		15.328871
-t_{16}		16.1521944
-t_{17}		17.0057032
-t_{18}		18.8169413
-(1-r_{2})		0.2643505
-t_{19}		19.5466342
-t_{20}		20.6892273
-&rho		0
-------------------------
-Concordance factor:
-Quartet		Formula
-AB|CD		(exp(-t_{3}-t_{16}-t_{17}-t_{19}-t_{20})/3)
-AC|BD		(1-2*exp(-t_{3}-t_{16}-t_{17}-t_{19}-t_{20})/3)
-AD|BC		(exp(-t_{3}-t_{16}-t_{17}-t_{19}-t_{20})/3)
-AB|CE		(((exp(-t_{3}-t_{20})/3)*r_{2}+(exp(-t_{3}-t_{19}-t_{20})/3)*(1
-.
-.
-.
-```
-### Creating Macaulay2 and Matlab input file
-To use algebraic methods to study the coalescent model for a given network, we can think of the quartet CFs as a parametrization. The Zariski closure of the image of this parametrization is an *algebraic variety*. Such varieties are studied in algebraic statistics.
-- setting the option `macaulay=true` in the function `network_expectedCF_formulas` produces a text file with Macaulay2 script to compute the ideal associated with the CF parametrization and its dimension.
-```@julia
-julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,symbolic=true,macaulay=true)
-```
-Sometimes, it may be challenging to compute the ideal of our CF parametrization, and we may only need information about the variety (like the dimension), which can be obtained without computing the elimination ideal of the CF parametrization.
-- setting the option `matlab=true` in the function `network_expectedCF_formulas` produces a text file with MATLAB script to compute the dimension of the variety associated with the CF parametrization. This computation is done numerically using the methods in the paper [*Witness sets of projections*](https://www3.nd.edu/~jhauenst/preprints/hsProjection.pdf) by Jonathan D. Hauenstein and Andrew J. Sommese.
-```@julia
-julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,symbolic=true, matlab=true)
-```
-One can set the option `multigraded=true` in the function `network_expectedCF_formulas` to get a text file containing Macaulay2 scripts to compute some (degree) graded piece of the elimination ideal of our CF parametrization using the method in J. Cummings and B. Hollering's paper: [Computing Implicitizations of Multi-Graded Polynomial Maps](https://arxiv.org/abs/2311.07678).
-
-```@julia
-julia> network_expectedCF_formulas(net,inheritancecorrelation=0,savecsv=true,symbolic=true, multigraded=true)
-```
-
-### Visualizing network with parameter names
 ```@julia
 julia> el=makeEdgeLabel(net, showTerminalEdgeLabels=false)
-20×2 DataFrame
- Row │ number   label
-     │ Integer  String
-─────┼─────────────────
-   1 │       1  t_{1}
-   2 │       2  t_{2}
-   3 │       3  t_{3}
-   4 │       4  t_{4}
-   5 │       5  t_{5}
-   6 │       6  t_{6}
-   7 │       7  t_{7}
-   8 │       8  t_{8}
-   9 │       9  t_{9}
-  10 │      10  t_{10}
-  11 │      11  t_{11}
-  12 │      12  t_{12}
-  13 │      13  t_{13}
-  14 │      14  t_{14}
-  15 │      15  t_{15}
-  16 │      16  t_{16}
-  17 │      17  t_{17}
-  18 │      18  t_{18}
-  19 │      19  t_{19}
-  20 │      20  t_{20}
-```
+9×2 DataFrame
+ Row │ number  label  
+     │ Int64   String 
+─────┼────────────────
+   1 │      3  t_{3}
+   2 │      6  t_{6}
+   3 │      7  t_{7}
+   4 │      8  t_{8}
+   5 │      9  t_{9}
+   6 │     10  t_{10}
+   7 │     11  t_{11}
+   8 │     13  t_{13}
+   9 │     14  t_{14}
 
-```@julia  
 julia> using PhyloPlots
-julia> plot(net,edgelabel=elabels)
+julia> plot(net,edgelabel=el)
 ```
-![Alt text](example/edgelabeled-ik1.png)
 
+Then we see:
+![Alt text](plot.png)
 
+## Reformatting the formula outputs 
+
+Finally, the dataframe that contains all split and either numerical or symbolic equations can be reformatted for subsequent analysis using different programs. Function `function reformat_export()` takes the input network and the formula dataframe as input and can export it into a `csv` file or reformat it for use in `Macaulay` (for Grobner basis, multigraded implicitization) and `Matlab`. For example,
+
+```@julia
+julia> reformat_export(net,df, macaulay=true, multigraded=false, matlab=true, csv=false, filename="sqnc--")
+```
+
+will create two new files in the working folder: `sqnc_output_macaulay.m2` and `sqnc_output_matlab.m`. Below shows a peek of the former file:
+
+```
+R = QQ[R1,R2,X10,X11,X13,X14,X3,X6,X7,X8,X9,C_1..C_15]
+I = ideal(
+(((X3)/3)*R1+(((((X8*X3)*R2)*(R2*(1-0.0)+0.0))*(((X14*X11*X9)/3)))+((((X8*X3)*(1-R2))*R2*(1-0.0))*(((X14*X11)/3)+((X14*X11)/3)))+((((X8*X3)*(1-R2))*((1-R2)*(1-0.0)+0.0))*(((X14*X11*X10)/3))))*(1-R1))-C_1,
+(((X3)/3)*R1+(((((X8*X3)*R2)*(R2*(1-0.0)+0.0))*(((X14*X11*X9)/3)))+((((X8*X3)*(1-R2))*R2*(1-0.0))*(((X14*X11)/3)+((X14*X11)/3)))+((((X8*X3)*(1-R2))*((1-R2)*(1-0.0)+0.0))*(((X14*X11*X10)/3))))*(1-R1))-C_2,
+((1-2*(X3)/3)*R1+((1-(X8*X3))+((((X8*X3)*R2)*(R2*(1-0.0)+0.0))*((1-2*(X14*X11*X9)/3)))+((((X8*X3)*(1-R2))*R2*(1-0.0))*((1-2*(X14*X11)/3)+(1-2*(X14*X11)/3)))+((((X8*X3)*(1-R2))*((1-R2)*(1-0.0)+0.0))*((1-2*(X14*X11*X10)/3))))*(1-R1))-C_3,
+.
+.
+.
+```
 ## Citation
+
+
+
+
+
+
