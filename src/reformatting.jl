@@ -22,7 +22,7 @@ function reformat_export(net, df;
     function rationalize(x;sigdigits=16)
         rational=string(Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1))
         rational=replace(rational, r"//" => "/")
-       return rational
+       return "($rational)"
        end
 
     if(macaulay)
