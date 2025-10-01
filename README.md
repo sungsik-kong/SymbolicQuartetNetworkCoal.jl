@@ -180,6 +180,11 @@ I = ideal(
 .
 .
 ```
+
+On your terminal you can run the `.m2` output using a line similar to the one below:
+```
+m2 < sqnc_output_macaulay.m2 > out.txt
+```
 ## Citation
 
 
