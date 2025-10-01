@@ -136,8 +136,8 @@ algebraic or likelihood-based calculations.
 
 - **Inheritance probabilities (γ):**  
   For each hybrid node, the two incoming edges are assigned labels:
-  - `"$rLab{j}"` for the first edge  
-  - `"(1-$rLab{j})"` for the second edge  
+  - `"r_{j}"` for the first edge  
+  - `"(1-r_{j})"` for the second edge  
   where `j` is the index of the hybrid node (1-based).  
   Each `γ` value is rounded to `dpoints` decimal places before being used as a dictionary key.
 
@@ -156,7 +156,7 @@ throw an error otherwise.
 # Returns
 - `Dict{Any, String}`: A dictionary mapping numerical parameter values to symbolic labels.
 """
-function parameterDictionary1(net, inheritancecorrelation; gammaSymbol=rLab::String)
+function parameterDictionary1(net, inheritancecorrelation; gammaSymbol="r_"::String)
     dict = Dict()
 
     # Dictionary for inheritance probabilities (γ)
@@ -207,7 +207,6 @@ function binary_to_tstring(binary_str::String; edge_label=eLab::String)
     # Join as required
     return join(["$edge_label{$i}" for i in positions], "-")
 end
-
 
 
 
@@ -328,10 +327,10 @@ This function converts a `HybridNetwork` topology into an **extended Newick form
 ## Returns
 - A string representing the network in symbolic extended Newick format.
 """
-function gettingSymbolicTopology(net::HybridNetwork, dict::Dict)
-    eNewick=PN.writeTopology(net)
+function gettingSymbolicTopology(net::HybridNetwork, dict::Dict; edge_label=eLab::String)
+    eNewick=PhyloNetworks.writeTopology(net)
     for e in net.edge 
-        eNewick=replace(eNewick,"$(e.length)"=>"t_{$(e.number)}")
+        eNewick=replace(eNewick,"$(e.length)"=>"$edge_label{$(e.number)}")
         eNewick=replace(eNewick,"$(e.gamma)"=>"$(dict[e.gamma])")
     end
     return eNewick
@@ -806,5 +805,5 @@ end
     if net.numHybrids != formernumhyb # deleteleaf! does not update containroot
         PhyloNetworks.allowrootbelow!(net)
     end
-    return net,synth_e_dict
+    return net
 end

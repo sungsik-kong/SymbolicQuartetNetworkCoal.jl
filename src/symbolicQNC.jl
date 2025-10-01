@@ -90,7 +90,7 @@ function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
         Qdeleteleaf!(net, taxon, synth_e_dict, simplify=false, unroot=false) # would like unroot=true but deleteleaf! throws an error when the root is connected to 2 outgoing hybrid edges
     end
 
-    q,qCFp,synth_e_dict=network_expectedCF_4taxa!(net, taxa[quartet.taxonnumber], inheritancecorrelation, qCFp, dict, symbolic, synth_e_dict)
+    q,qCFp=network_expectedCF_4taxa!(net, taxa[quartet.taxonnumber], inheritancecorrelation, qCFp, dict, symbolic, synth_e_dict)
     quartet.data .= q
 
     #storing the equations to DataFrames
@@ -129,21 +129,18 @@ For `inheritancecorrelation` see [`network_expectedCF`](@ref).
 Its value should be between 0 and 1 (not checked by this internal function).
 """
 function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorrelation, qCFp, dict, symbolic,synth_e_dict)
-    #kong: begin writing qCF equations  with an opening bracket
     qCFp .*= "("         
     deleteaboveLSA!(net)
     # make sure the root is of degree 3+
     if length(net.node[net.root].edge) <= 2
         Qfuseedgesat!(net.root, net,synth_e_dict)
     end
-
     # find and delete degree-2 blobs along external edges
     bcc = biconnectedComponents(net, true) # true: ignore trivial blobs
     entry = PN.biconnectedcomponent_entrynodes(net, bcc)
     entryindex = indexin(entry, net.nodes_changed)
     exitnodes = PN.biconnectedcomponent_exitnodes(net, bcc, false) # don't redo the preordering
     bloborder = sortperm(entryindex) # pre-ordering for blobs in their own blob tree
-    
     
         function isexternal(ib) # is bcc[ib] of degree 2 and adjacent to an external edge?
             # yes if: 1 single exit adjacent to a leaf
@@ -161,8 +158,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             # delete minor hybrid edge with options unroot=true: to make sure the
             # root remains of degree 3+, in case a degree-2 blob starts at the root
             # simplify=true: bc external blob
-            net,synth_e_dict=Qdeletehybridedge!(net,he,synth_e_dict,false,true,false,true,false)
-             
+            net=Qdeletehybridedge!(net,he,synth_e_dict,false,true,false,true,false)
         end
     end
 
@@ -209,7 +205,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
               (sistertofirst == 3 ? MVector{3,Float64}(minorcf,majorcf,minorcf) :
                                     MVector{3,Float64}(minorcf,minorcf,majorcf) ))
         #writing out the equations
-        internallength=round(internallength, digits = dpoints)    
+        #internallength=round(internallength, digits = dpoints)    
         if symbolic
             minorcfp = "exp(-$(binary_to_tstring(synth_e_dict[(enumber,cut_edges_pa,cut_edges_ch)])))/3"
             majorcfp = "1-2*$minorcfp"
@@ -281,10 +277,10 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     synth_e_dict[(0,nodeset[2].number,nodeset[1].number)]=SymbolicQuartetNetworkCoal.binary(remaining_edges[2].number,synth_e_dict[(0,temp_parent,temp_child)])
     end
 =#
-                simplernet,synth_e_dict=Qdeletehybridedge!(simplernet, simplernet.edge[pe_index],synth_e_dict, false,true,false,false,false) # ., unroot=true, ., simplify=false,.          
+                simplernet=Qdeletehybridedge!(simplernet, simplernet.edge[pe_index],synth_e_dict, false,true,false,false,false) # ., unroot=true, ., simplify=false,.          
             end
             
-            qCF0,qCFp,synth_e_dict = network_expectedCF_4taxa!(simplernet, fourtaxa, inheritancecorrelation,qCFp,dict,symbolic,synth_e_dict)
+            qCF0,qCFp = network_expectedCF_4taxa!(simplernet, fourtaxa, inheritancecorrelation,qCFp,dict,symbolic,synth_e_dict)
           
             qCF .+= gamma .* qCF0
             
@@ -309,8 +305,8 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
     internallength = ( ispolytomy ? 0.0 : funneledge[1].length)
     deepcoalprob = exp(-internallength)
-    deepcoalprob=round(deepcoalprob, digits = dpoints)
-    internallength=round(internallength, digits = dpoints)
+    #deepcoalprob=round(deepcoalprob, digits = dpoints)
+    #internallength=round(internallength, digits = dpoints)
     if symbolic deepcoalprobp="exp(-$internallength)" end
     # initialize qCF: when the 2 descendants coalesce before reaching the hybrid node
     qCF = (sistertofirst == 2 ? MVector{3,Float64}(1.0-deepcoalprob,0.0,0.0) :
@@ -341,19 +337,19 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
       pgam=parenthedge[i].gamma
       weighti = deepcoalprob * pgam
       #kong: round weighti to n digits
-      weighti=round(weighti, digits = dpoints)
+      #weighti=round(weighti, digits = dpoints)
       
       for j in (sameparents ? i : 1):i # if inheritancecorrelation=1 then i!=j has probability 0
         gammaj = parenthedge[j].gamma
         #kong: round gammaj to n digits
-        gammaj=round(gammaj, digits = dpoints)
+        #gammaj=round(gammaj, digits = dpoints)
 
         simplernet = ( i < nhe || j < nhe ? deepcopy(net) : net )
         # delete all hybedges other than i & j
         for k in 1:nhe
             (k == i || k ==j) && continue # don't delete hybrid edges i or j
             pe_index = findfirst(e -> e.number == parenthnumber[k], simplernet.edge)
-            simplernet,synth_e_dict=Qdeletehybridedge!(simplernet, simplernet.edge[pe_index],synth_e_dict,false,true,false,false,false) # ., unroot=true,., simplify=false,.
+            simplernet=Qdeletehybridedge!(simplernet, simplernet.edge[pe_index],synth_e_dict,false,true,false,false,false) # ., unroot=true,., simplify=false,.
         end
         if i != j
             # detach childedge[2] from hyb and attach it to hyb's parent j
@@ -369,20 +365,20 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             push!(pn.edge, ce2)
             # then delete hybedge j
 
-            simplernet,synth_e_dict=Qdeletehybridedge!(simplernet, pej,synth_e_dict, false,true,false,false,false) # ., unroot=true,., simplify=false,.)
+            simplernet=Qdeletehybridedge!(simplernet, pej,synth_e_dict, false,true,false,false,false) # ., unroot=true,., simplify=false,.)
 
-            for e in simplernet.edge
-                e.length=round(e.length, digits = dpoints)
-            end
+            #for e in simplernet.edge
+            #    e.length=round(e.length, digits = dpoints)
+            #end
         end
         #kong: add "+" if there are more than a single element in the equation
         if i>1 qCFp .*= "+" end
         #initialize qCFp for qCF_subnet
         qCFps=["","",""]
-        qCF_subnet, qCFps, synth_e_dict = network_expectedCF_4taxa!(simplernet, fourtaxa, inheritancecorrelation, qCFps, dict,symbolic,synth_e_dict)
+        qCF_subnet, qCFps = network_expectedCF_4taxa!(simplernet, fourtaxa, inheritancecorrelation, qCFps, dict,symbolic,synth_e_dict)
         if i == j
             prob = weighti * (gammaj * oneminusrho + inheritancecorrelation)
-            prob=round(prob, digits = dpoints)
+            #prob=round(prob, digits = dpoints)
 
             qCF .+= prob .* qCF_subnet
             
@@ -400,7 +396,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             flipped_ij = (sistertofirst == 2 ? [1,3,2] :
                          (sistertofirst == 3 ? [3,2,1] : [2,1,3] ))
             prob = weighti * gammaj * oneminusrho
-            prob=round(prob, digits = dpoints)
+            #prob=round(prob, digits = dpoints)
 
             qCF .+= prob .* (qCF_subnet .+ qCF_subnet[flipped_ij])
     
@@ -419,5 +415,5 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     
     qCFp .*= ")"
     
-    return qCF, qCFp, synth_e_dict
+    return qCF, qCFp
 end
