@@ -18,6 +18,12 @@ function reformat_export(net, df;
     numCFs=size(df)[1]
     dataframe=deepcopy(df)
     params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
+    
+    function rationalize(x;sigdigits=16)
+        rational=string(Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1))
+        rational=replace(rational, r"//" => "/")
+       return rational
+       end
 
     if(macaulay)
         filename1=filename*"_macaulay"
@@ -30,10 +36,14 @@ function reformat_export(net, df;
         str=str*"I = ideal(\n"
         i=1
         while i<numCFs
-            str=str*"$(dataframe[i,2])-C_$i,\n"
+            str1=(dataframe[i,2])
+            str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))
+            str=str*"$str1-C_$i,\n"
             i+=1
         end
-        str=str*"$(dataframe[numCFs,2])-C_$numCFs);\n"
+        str1=(dataframe[numCFs,2])
+        str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))
+        str=str*"$(str1)-C_$numCFs);\n"
         str=str*"G = eliminate (I, {"
         numparams=length(params)   
         for par in 1:(length(params)-1) str=str*params[par]*"," end
@@ -57,10 +67,14 @@ function reformat_export(net, df;
             str=str*"F=["
             i=1
             while i<numCFs
-                str=str*"$(dataframe[i,2])-C_$i,\n"
+str1=(dataframe[i,2])
+str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))                
+                str=str*"$(str1)-C_$i,\n"
                 i+=1
             end
-            str=str*"$(dataframe[numCFs,2])-C_$numCFs];\n"
+str1=(dataframe[numCFs,2])
+str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))            
+            str=str*"$(str1)-C_$numCFs];\n"
             str=str*"\n% matrix of generating polynomials\n"
             str=str*"\n% Array of all variables\n"
             str=str*"V=["
@@ -84,10 +98,14 @@ function reformat_export(net, df;
         str=str*"im = {\n"
         i=1
         while i<numCFs
-            str=str*"$(dataframe[i,2]),\n"
+str1=(dataframe[i,2])
+str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))                 
+            str=str*"$(str1),\n"
             i+=1
         end
-        str=str*"$(dataframe[numCFs,2])};\n"
+str1=(dataframe[numCFs,2])
+str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))            
+        str=str*"$(str1)};\n"
 
         str=str*"im = {T} | apply(im, f -> f * T);\n"
         str=str*"phi = map(R, S, im)\n"
@@ -110,10 +128,14 @@ function reformat_export(net, df;
         str=str*"ideal I = \n"
         i=1
         while i<numCFs
-            str=str*"$(dataframe[i,2])-C$i,\n"
+str1=(dataframe[i,2])
+str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))               
+            str=str*"$(str1)-C$i,\n"
             i+=1
         end
-        str=str*"$(dataframe[numCFs,2])-C$numCFs;\n"
+str1=(dataframe[numCFs,2])
+str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))  
+        str=str*"$(str1)-C$numCFs;\n"
 
         str=str*"ideal G = eliminate (I, "
         for par in params str=str*par*"*" end
