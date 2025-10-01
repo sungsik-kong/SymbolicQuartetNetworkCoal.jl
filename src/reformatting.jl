@@ -8,8 +8,8 @@ function reformat_export(net, df;
                             csv=true::Bool,
                             macaulay=false::Bool,
                             matlab=false::Bool,
-                            multigraded=false::Bool
-                            #singular=false::Bool
+                            multigraded=false::Bool,
+                            singular=false::Bool
                             )
 
     if(csv) export_csv(df; filename=filename) end
@@ -98,37 +98,38 @@ function reformat_export(net, df;
         write(file, str)
         end
     end
-    #=
-        if(singular)
-            #filename*="_macaulay"
-            open("$filename.sing", "w") do file
-            str="ring R = 0, ("
-            for par in params str=str*par*"," end
-            for i in 1:numCFs str=str*"C$i," end
-            str=chop(str)
-            str=str*"), dp;\n"
-            str=str*"ideal I = \n"
-            i=1
-            while i<numCFs
-                str=str*"$(dataframe[i,2])-C$i,\n"
-                i+=1
-            end
-            str=str*"$(dataframe[numCFs,2])-C$numCFs;\n"
 
-            str=str*"ideal G = eliminate (I, "
-            for par in params str=str*par*"*" end
-            str=chop(str)
-            str=str*");\n"
-
-            str=str*"ring S = 0, ("
-            for i in 1:numCFs str=str*"C$i," end
-            str=chop(str)
-            str=str*"), dp;\n"
-            str=str*"ideal J = imap(R, G);\n"
-            str=str*"int dimJ = dim(J);\n"
-            str=str*"dimJ;"
-            write(file, str)
+    if(singular)
+        #filename*="_macaulay"
+        open("$filename.sing", "w") do file
+        str="ring R = 0, ("
+        for par in params str=str*par*"," end
+        for i in 1:numCFs str=str*"C$i," end
+        str=chop(str)
+        str=str*"), dp;\n"
+        str=str*"ideal I = \n"
+        i=1
+        while i<numCFs
+            str=str*"$(dataframe[i,2])-C$i,\n"
+            i+=1
         end
-    =#
+        str=str*"$(dataframe[numCFs,2])-C$numCFs;\n"
+
+        str=str*"ideal G = eliminate (I, "
+        for par in params str=str*par*"*" end
+        str=chop(str)
+        str=str*");\n"
+
+        str=str*"ring S = 0, ("
+        for i in 1:numCFs str=str*"C$i," end
+        str=chop(str)
+        str=str*"), dp;\n"
+        str=str*"ideal J = imap(R, G);\n"
+        str=str*"int dimJ = dim(J);\n"
+        str=str*"dimJ;"
+        write(file, str)
+        end
+    end
+       
     return nothing
 end
