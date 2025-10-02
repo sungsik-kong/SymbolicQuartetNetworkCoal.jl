@@ -66,6 +66,8 @@ mapping taxon labels in to their indices in `taxa`, for easier lookup.
 
 `net` is not modified.
 
+ESA:  Is df modified since you use push! ?  I.e. is df changed in place??
+
 For `inheritancecorrelation` see [`network_expectedCF`](@ref).
 Its value should be between 0 and 1 (not checked by this internal function).
 """
