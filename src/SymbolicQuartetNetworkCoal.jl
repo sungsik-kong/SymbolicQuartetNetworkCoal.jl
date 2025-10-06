@@ -9,7 +9,7 @@ module SymbolicQuartetNetworkCoal
 
     const dpoints=10 #decimal points for all parameters when randomly generated
     const eLab="t_"
-    #const rLab="r_"
+    const rLab="r_"
     const PN = PhyloNetworks
 
     export
