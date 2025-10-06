@@ -1,7 +1,7 @@
 #test written by Sungsik Kong 2025
 const eLab="t_"
 const rLab="r_"
-const dpoints=3
+const dpoints=10
 
 @testset begin
     threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
