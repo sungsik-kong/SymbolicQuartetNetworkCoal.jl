@@ -40,8 +40,10 @@ function network_expectedCF_formulas(net::HybridNetwork;
     taxa = sort!(tipLabels(net))
     taxonnumber = Dict(taxa[i] => i for i in eachindex(taxa))
     ntax = length(taxa)
+    # ESA I don't think you need nCk here ???  I don't see it used except below
     nCk = PN.nchoose1234(ntax) # matrix to rank 4-taxon sets
     qtype = MVector{3,Float64} # 3 floats: CF12_34, CF13_24, CF14_23; initialized at 0.0
+    # ESA: binomial(ntax,4) would be sufficient?
     numq = nCk[ntax+1,4]    
     quartet = Vector{PN.QuartetT{qtype}}(undef, numq)
     ts = [1,2,3,4]
