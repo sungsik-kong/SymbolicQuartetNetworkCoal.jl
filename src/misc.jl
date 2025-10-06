@@ -36,11 +36,9 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer
     #---------read in topology: input is either newick string or HybridNetwork object---------#
     if net isa PhyloNetworks.HybridNetwork
     else net=PhyloNetworks.readTopology(net) end
-
     #--------generate arbitrary edge lengths--------#
-    for e in net.edge e.length=round(scaleparameter*(rand()),digits=decimalpoints) end #edge lengths <1, may be more realistic values
+    for e in net.edge e.length=round(scaleparameter*(1+rand()),digits=decimalpoints) end #edge lengths <1, may be more realistic values
     #for e in net.edge e.length=round((scaleparameter*(e.number+0.01)),digits=dpoints) end #this option makes it easier to keep track of elengths during debugging
-
     #--------generaete arbitrary inheritance probabilities--------#
     #----preambles----#
     reticulatenodeindex=Int[]
@@ -52,44 +50,17 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer
     #check the number of hybrid nodes are counted correctly
     length(reticulatenodeindex)==nreticulate || @error "Inheritance probability generation failed. Retry."
     #generate arbitrary gamma values n=number of reticulation nodes (that will be assigned to one of the incoming edges)
-    mingam=0.01*nedge
-    j=0
-    for i in 1:nreticulate
-        j+=1
-        gammavec[i] = round((mingam+(0.01*j)), digits=decimalpoints)
-    end
-    #gammavec .= round.(rand(Uniform(parse(Float64,"0.$nedge"),0.499),nreticulate), digits=decimalpoints)
+    gammavec .= round.(rand(), digits=decimalpoints)
     #assign inheritance probabilities to all reticulate edges
     for (nthgamma, nodeidx) in enumerate(reticulatenodeindex)
         # collect the incoming hybrid edges to this node
         incoming = [e for e in net.edge if e.hybrid && PhyloNetworks.getchild(e).number == nodeidx]
-
         if length(incoming) != 2
             error("Hybrid node $nodeidx has $(length(incoming)) incoming edges (expected 2).")
         end
-
         incoming[1].gamma = gammavec[nthgamma]
         incoming[2].gamma = round(1 - gammavec[nthgamma], digits=decimalpoints)
     end
-    
-    #=
-    for nthgamma in 1:nreticulate
-        visits = 0
-        for e in net.edge
-            if e.hybrid && PhyloNetworks.getchild(e).number == reticulatenodeindex[nthgamma]
-                visits += 1
-                if visits == 1
-                    e.gamma = gammavec[nthgamma]
-                elseif visits == 2
-                    e.gamma = round(1 - gammavec[nthgamma], digits=dpoints)
-                else
-                    error("Hybrid node $(reticulatenodeindex[nthgamma]) has more than 2 incoming edges.")
-                end
-            end
-        end
-    end
-    =#
-
     return net
 end
 
@@ -100,8 +71,8 @@ Prints an ASCII art representation along with the text `Hawai'i-Five-O`.
 If you see the Hawaiian "shaka" hand gesture, relax and take it easy, 
 because your `SymbolicQuartetNetworkCoal.jl` is installed correctly.
 """
-function aloha()
-    println(raw"""
+function aloha(;scale::Int=1)
+    ascii = raw"""
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣴⠂⢀⡀⠀⢀⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣤⣄⣠⣀⠀⠘⠋⠉⠉⠁⠀⠺⣿⡷⣿⣿⣿⡿⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⣛⠛⠉⠀⠀⠀⠀⠺⣷⣦⠀⠀⠀⠙⠛⠉⠀⠀⠈⣿⣦⣤⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -118,67 +89,24 @@ function aloha()
 ⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣷⣄⠙⠧⣍⣩⡜⢀⣀⣀⠄⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣿⣷⣦⣄⣀⣤⣾⣿⣿⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ 
-               Hawai'i-Five-O""")
-end
+               Hawai'i-Five-O"""
 
-
-"""
-    parameterDictionary1(net, inheritancecorrelation; gammaSymbol::String="r")
-
-Creates a dictionary mapping inheritance probabilities (γ) and inheritance correlation (ρ) 
-in a phylogenetic network to symbolic labels.
-
-# Description
-This function generates a dictionary of symbolic parameter labels for use in 
-algebraic or likelihood-based calculations.
-
-- **Inheritance probabilities (γ):**  
-  For each hybrid node, the two incoming edges are assigned labels:
-  - `"r_{j}"` for the first edge  
-  - `"(1-r_{j})"` for the second edge  
-  where `j` is the index of the hybrid node (1-based).  
-  Each `γ` value is rounded to `dpoints` decimal places before being used as a dictionary key.
-
-- **Inheritance correlation (ρ):**  
-  The provided `inheritancecorrelation` value is assigned the label `"&rho"`.  
-  Its complement, `1 - ρ`, is rounded and assigned the label `"1-&rho"`.
-
-This function assumes each hybrid node has exactly two incoming edges, and will 
-throw an error otherwise.
-
-# Arguments
-- `net::PhyloNetworks.HybridNetwork`: The input network object.
-- `inheritancecorrelation::Float64`: The inheritance correlation value.
-- `gammaSymbol::String="r"`: Optional prefix for inheritance probability labels.
-
-# Returns
-- `Dict{Any, String}`: A dictionary mapping numerical parameter values to symbolic labels.
-"""
-function parameterDictionary1(net, inheritancecorrelation; gammaSymbol="r_"::String)
-    dict = Dict()
-
-    # Dictionary for inheritance probabilities (γ)
-    hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
-    for (j, hybNode) in enumerate(hybridNodeNumbers)
-        incoming = [e for e in net.edge if PhyloNetworks.getchild(e).number == hybNode]
-        if length(incoming) != 2
-            error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
+    function scale_ascii_art(art::String; scale::Int=scale)
+        lines = split(art, '\n')
+        new_lines = String[]
+        for (i, line) in enumerate(lines)
+            if (i - 1) % scale == 0   
+                reduced = String([c for (j, c) in enumerate(line) if (j - 1) % scale == 0]) 
+                push!(new_lines, reduced)
+            end
         end
-        for (k, e) in enumerate(incoming)
-            e.gamma = round(e.gamma, digits=dpoints)
-            dict[e.gamma] = k == 1 ? "$gammaSymbol{$j}" : "(1-$gammaSymbol{$j})"
-        end
+        return join(new_lines, "\n")
     end
 
-    # Inheritance correlation (ρ)
-    dict[inheritancecorrelation] = "&rho"
-    dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-&rho"
-    
-    return dict
+    println(scale_ascii_art(ascii, scale=scale))
 end
-
 
 """
     binary_to_tstring(binary_str::String) -> String
@@ -207,135 +135,7 @@ function binary_to_tstring(binary_str::String; edge_label=eLab::String)
     # Join as required
     return join(["$edge_label{$i}" for i in positions], "-")
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-    binary(n::Int, binstr::String) -> String
-
-Set the nth bit of a binary string to 1, returning the updated binary string.
-If the input string is empty, returns a string of length `n` with the first bit set to 1 and the rest zeros.
-
-Arguments:
-- n::Int : The bit position to set (1-based, from the rightmost bit).
-- binstr::String : A binary string. Can be empty.
-
-Returns:
-- String : The binary string with the nth bit set.
-
-Examples:
-- binary(3, "10") # returns "110"
-- binary(5, "") # returns "10000"
-"""
-function binary(n::Int, binstr::String)
-    if isempty(binstr)
-        # If empty, create 1 followed by (n-1) zeros
-        return "1" * repeat("0", n-1)
-    end    
-    # Convert binary string to integer
-    original = parse(Int, binstr)#; base=2)    
-    # Set the nth bit to 1
-    new_value = original | (1 << (n-1))    
-    # Determine the minimum length: keep at least n bits
-    min_len = max(length(binstr), n)  
-    # Convert to binary string
-    new_binstr = string(new_value)#, base=2)
-    # Pad with leading zeros if necessary
-    if length(new_binstr) < min_len
-        new_binstr = lpad(new_binstr, min_len, '0')
-    end
-    return new_binstr
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-    gettingSymbolicTopology(net::HybridNetwork, dict::Dict)
-
-Replaces numeric parameter values with symbolic representations in an extended Newick string.
-
-## Description
-This function converts a `HybridNetwork` topology into an **extended Newick format** where:
-- Edge lengths are replaced by symbols of the form `"t_{e}"`.
-- Inheritance probabilities (`γ`) are replaced using their corresponding symbolic values from `dict`.
-
-## Arguments
-- `net`: A `HybridNetwork` object.
-- `dict`: A dictionary mapping numerical values to symbolic labels.
-
-## Returns
-- A string representing the network in symbolic extended Newick format.
-"""
-function gettingSymbolicTopology(net::HybridNetwork, dict::Dict; edge_label=eLab::String)
-    eNewick=PhyloNetworks.writeTopology(net)
-    for e in net.edge 
-        eNewick=replace(eNewick,"$(e.length)"=>"$edge_label{$(e.number)}")
-        eNewick=replace(eNewick,"$(e.gamma)"=>"$(dict[e.gamma])")
-    end
-    return eNewick
-end
-    
+   
 """
     gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
@@ -431,11 +231,7 @@ function makeEdgeLabel(net; showTerminalEdgeLabels=false)
     return df
 end
 
-
-
-
-
-function Qremovedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false; symbolic::Bool=false)
+function sqnc_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false)
     rootnode = getroot(net)
     # caution: the root and its incident edges may change when degree-2 nodes
     #          are removed. Indices of nodes to be removed would change too.
@@ -451,6 +247,10 @@ function Qremovedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false; sy
     end
     return net,dict
 end
+
+
+
+
 
 function Qdeleteleaf!(net::HybridNetwork, node::PhyloNetworks.Node, synth_e_dict; kwargs...)
     node.leaf || error("node number $(node.number) is not a leaf.")
@@ -652,7 +452,6 @@ f2=parse(BigInt,synth_e_dict[(pen,pep,pec)])
 synth_e_dict[(ce.number,p,c)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(ce.number,c,p)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 end    
-
     return ce
 end
 
@@ -770,8 +569,6 @@ if n2.hybrid
     if !(c1.leaf) && !(c2.leaf)
     f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
     f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
-    #synth_e_dict[(0,p1.number,p2.number)]=string(f1+f2)
-    #synth_e_dict[(0,p2.number,p1.number)]=string(f1+f2)
     synth_e_dict[(n2.edge[1].number,p1.number,p2.number)]=string(f1+f2)
     synth_e_dict[(n2.edge[1].number,p2.number,p1.number)]=string(f1+f2)
     end
@@ -784,13 +581,9 @@ else
     f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
     f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
         if (p1,c1)==(p2,c2)
-            #synth_e_dict[(0,p1.number,c2.number)]=string(f1)
-            #synth_e_dict[(0,c2.number,p1.number)]=string(f1)
             synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1)
             synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1)
         else
-            #synth_e_dict[(0,p1.number,c2.number)]=string(f1+f2)
-            #synth_e_dict[(0,c2.number,p1.number)]=string(f1+f2)
             synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2)
             synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1+f2)
         end
@@ -807,3 +600,99 @@ end
     end
     return net
 end
+
+#=
+    """
+        binary(n::Int, binstr::String) -> String
+
+    Set the nth bit of a binary string to 1, returning the updated binary string.
+    If the input string is empty, returns a string of length `n` with the first bit set to 1 and the rest zeros.
+
+    Arguments:
+    - n::Int : The bit position to set (1-based, from the rightmost bit).
+    - binstr::String : A binary string. Can be empty.
+
+    Returns:
+    - String : The binary string with the nth bit set.
+
+    Examples:
+    - binary(3, "10") # returns "110"
+    - binary(5, "") # returns "10000"
+    """
+    function bina11ry(n::Int, binstr::String)
+        if isempty(binstr)
+            # If empty, create 1 followed by (n-1) zeros
+            return "1" * repeat("0", n-1)
+        end    
+        # Convert binary string to integer
+        original = parse(Int, binstr)#; base=2)    
+        # Set the nth bit to 1
+        new_value = original | (1 << (n-1))    
+        # Determine the minimum length: keep at least n bits
+        min_len = max(length(binstr), n)  
+        # Convert to binary string
+        new_binstr = string(new_value)#, base=2)
+        # Pad with leading zeros if necessary
+        if length(new_binstr) < min_len
+            new_binstr = lpad(new_binstr, min_len, '0')
+        end
+        return new_binstr
+    end
+=#
+
+#=
+    """
+        parameterDictionary1(net, inheritancecorrelation; gammaSymbol::String="r")
+
+    Creates a dictionary mapping inheritance probabilities (γ) and inheritance correlation (ρ) 
+    in a phylogenetic network to symbolic labels.
+
+    # Description
+    This function generates a dictionary of symbolic parameter labels for use in 
+    algebraic or likelihood-based calculations.
+
+    - **Inheritance probabilities (γ):**  
+    For each hybrid node, the two incoming edges are assigned labels:
+    - `"r_{j}"` for the first edge  
+    - `"(1-r_{j})"` for the second edge  
+    where `j` is the index of the hybrid node (1-based).  
+    Each `γ` value is rounded to `dpoints` decimal places before being used as a dictionary key.
+
+    - **Inheritance correlation (ρ):**  
+    The provided `inheritancecorrelation` value is assigned the label `"&rho"`.  
+    Its complement, `1 - ρ`, is rounded and assigned the label `"1-&rho"`.
+
+    This function assumes each hybrid node has exactly two incoming edges, and will 
+    throw an error otherwise.
+
+    # Arguments
+    - `net::PhyloNetworks.HybridNetwork`: The input network object.
+    - `inheritancecorrelation::Float64`: The inheritance correlation value.
+    - `gammaSymbol::String="r"`: Optional prefix for inheritance probability labels.
+
+    # Returns
+    - `Dict{Any, String}`: A dictionary mapping numerical parameter values to symbolic labels.
+    """
+    function paramesssterDictionary1(net, inheritancecorrelation; gammaSymbol="r_"::String)
+        dict = Dict()
+
+        # Dictionary for inheritance probabilities (γ)
+        hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
+        for (j, hybNode) in enumerate(hybridNodeNumbers)
+            incoming = [e for e in net.edge if PhyloNetworks.getchild(e).number == hybNode]
+            if length(incoming) != 2
+                error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
+            end
+            for (k, e) in enumerate(incoming)
+                e.gamma = round(e.gamma, digits=dpoints)
+                dict[e.gamma] = k == 1 ? "$gammaSymbol{$j}" : "(1-$gammaSymbol{$j})"
+            end
+        end
+
+        # Inheritance correlation (ρ)
+        dict[inheritancecorrelation] = "rho"
+        dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-rho"
+        
+        return dict
+    end
+=#
