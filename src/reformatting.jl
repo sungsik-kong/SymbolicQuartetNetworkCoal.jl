@@ -23,12 +23,10 @@ function reformat_export(net, df;
         rational=string(Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1))
         rational=replace(rational, r"//" => "/")
        return "($rational)"
-       end
+    end
 
     if(macaulay)
         filename1=filename*"_macaulay"
-        #str*="Write Macaulay2 file: "
-        #str*=(macaulay ? "on\n" : "off\n")
         open("$filename1.m2", "w") do file
         str="R = QQ["
         for par in params str=str*par*"," end
