@@ -248,10 +248,6 @@ function sqnc_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false
     return net,dict
 end
 
-
-
-
-
 function Qdeleteleaf!(net::HybridNetwork, node::PhyloNetworks.Node, synth_e_dict; kwargs...)
     node.leaf || error("node number $(node.number) is not a leaf.")
     Qdeleteleaf!(net, node.number,synth_e_dict; kwargs..., index=false)
@@ -412,7 +408,7 @@ function Qfuseedgesat!(i::Integer, net::HybridNetwork, synth_e_dict, multgammas=
 pen=pe.number
 pep=PN.getparent(pe).number
 pec=PN.getchild(pe).number
-#pee=deepcopy(pe)
+pee=deepcopy(pe)
     ce = nodei.edge[j==1 ? 2 : 1]
 cee=deepcopy(ce)
     if pe.hybrid       # unless it's a hybrid: should be --tree--> node i --hybrid-->
@@ -452,7 +448,16 @@ f2=parse(BigInt,synth_e_dict[(pen,pep,pec)])
 synth_e_dict[(ce.number,p,c)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 synth_e_dict[(ce.number,c,p)]=string(f1+f2)#binary(ce.number,synth_e_dict[pep,pec])
 end    
-    return ce
+if ce.hybrid
+    if pee.hybrid
+        synth_e_dict[(p,c,ce.gamma)]=synth_e_dict[(PN.getparent(pee).number,PN.getchild(pee).number,pee.gamma)]
+    elseif cee.hybrid
+      #``  display(synth_e_dict)
+        synth_e_dict[(p,c,ce.gamma)]=synth_e_dict[(PN.getparent(cee).number,PN.getchild(cee).number,cee.gamma)]
+    end
+end
+
+return ce
 end
 
 function Qdeletehybridedge!(
@@ -512,6 +517,11 @@ f1=parse(BigInt,synth_e_dict[(pe1.number,PN.getparent(pe1).number, PN.getchild(p
 f2=parse(BigInt,synth_e_dict[(ce1.number,PN.getparent(ce1).number, PN.getchild(ce1).number)])
 synth_e_dict[(ce.number,PN.getparent(pe).number,PN.getchild(ce).number)]=string(f1+f2)
 synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(pe).number)]=string(f1+f2)
+
+synth_e_dict[(PN.getparent(pe).number,PN.getchild(ce).number,edge.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
+synth_e_dict[(PN.getchild(ce).number,PN.getparent(pe).number,edge.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
+synth_e_dict[(PN.getparent(pe).number,PN.getchild(ce).number,ce.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
+synth_e_dict[(PN.getchild(ce).number,PN.getparent(pe).number,ce.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
 end
 
         PhyloNetworks.removeEdge!(pn,pe)
@@ -583,9 +593,11 @@ else
         if (p1,c1)==(p2,c2)
             synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1)
             synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1)
+            #println("here?1")
         else
             synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2)
             synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1+f2)
+            #println("here?2")
         end
     end
 end
