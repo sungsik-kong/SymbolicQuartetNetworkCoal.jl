@@ -6,7 +6,7 @@ const dpoints=10
 @testset begin
     threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
     ih=0.1 #inheritancecorrelation
-    filename=["topologies_n5_l1.txt","topologies_n5_l2.txt"]
+    filename=["topologies_n5_l1.txt","topologies_n5_l2.txt","sim_nets.txt"]
     count1=0
 
     function parameterDictionary1REV(testnet, ih)
@@ -49,13 +49,21 @@ const dpoints=10
             for i in eachline(file)
                 ###ioprint###
                 count+=1
-                println("[Level-$count1 network, $count]: $i")
                 ###ioprint###
                 df_true=DataFrame(Split=String[], CF_true=Float64[])
                 df_numeric=DataFrame(Split=String[], CF_numeric=String[], CF_val_from_numeric=Float64[])
                 df_symbolic=DataFrame(Split=String[], CF_symbolic=String[], CF_sym_substituted=String[], CF_val_from_symbolic=Float64[])
                 
                 testnet=SymbolicQuartetNetworkCoal.readTopologyrand(i)
+
+for e in testnet.edge
+    e.length=1.0
+    if e.hybrid
+        e.gamma=0.5
+    end
+end
+                println("Network in $afile [$count]: $(PhyloNetworks.writeTopology(testnet))")
+
                 revdict=parameterDictionary1REV(testnet,ih)                    
 
                 #compute true CFs and numeric formulas
