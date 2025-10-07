@@ -4,10 +4,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
                             symbolic=false::Bool)
     df = DataFrame(Split=String[], CF=String[]) 
 
-    #dict=parameterDictionary1(net,inheritancecorrelation)
-    #synth_e_dict = Dict{Tuple{Int,Int,Int}, String}()
     synth_e_dict = Dict()
-
 
     # Dictionary for inheritance probabilities (γ)
     hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
@@ -18,7 +15,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
         end
         for (k, e) in enumerate(incoming)
             e.gamma = round(e.gamma, digits=dpoints)
-            synth_e_dict[e.gamma] = k == 1 ? "$rLab{$j}" : "(1-$rLab{$j})"
+            #synth_e_dict[e.gamma] = k == 1 ? "$rLab{$j}" : "(1-$rLab{$j})"
             synth_e_dict[(PN.getparent(e).number, PN.getchild(e).number, e.gamma)] = k == 1 ? "$rLab{$j}" : "(1-$rLab{$j})"            
         end
     end
@@ -26,7 +23,6 @@ function network_expectedCF_formulas(net::HybridNetwork;
     # Inheritance correlation (ρ)
     synth_e_dict[(NaN,NaN,inheritancecorrelation)] = "rho"
     synth_e_dict[(NaN,NaN,round(1 - inheritancecorrelation, digits=dpoints))] = "1-rho"
-
 
     for e in net.edge
         synth_e_dict[(e.number,PN.getparent(e).number, PN.getchild(e).number)]="1" * repeat("0", e.number-1)
@@ -254,7 +250,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             # kong: add + if there are more than a single element
             if i>1 qCFp .*= "+" end
             gamma = parenthedge[i].gamma
-            #println(parenthedge[i])
+ei=parenthedge[i]
             simplernet = ( i < nhe ? deepcopy(net) : net ) # last case: to save memory allocation
             for j in 1:nhe
                 j == i && continue # don't delete hybrid edge i!
@@ -266,7 +262,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
           
             qCF .+= gamma .* qCF0
             
-            if (symbolic) qCFp .*= "*$(synth_e_dict[gamma])" 
+            if (symbolic) qCFp .*= "*$(synth_e_dict[(PN.getparent(ei).number, PN.getchild(ei).number, ei.gamma)])" 
             else qCFp .*= "*$gamma" end
             
         end
@@ -313,9 +309,14 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     childnumber = [e.number for e in childedge]
     for i in 1:nhe
       pgam=parenthedge[i].gamma
+ei=parenthedge[i]
+pgamtuple=(PN.getparent(ei).number,PN.getchild(ei).number,pgam)
       weighti = deepcoalprob * pgam      
       for j in (sameparents ? i : 1):i # if inheritancecorrelation=1 then i!=j has probability 0
         gammaj = parenthedge[j].gamma
+ei=parenthedge[j]
+gammajtuple=(PN.getparent(ei).number,PN.getchild(ei).number,gammaj)
+
         simplernet = ( i < nhe || j < nhe ? deepcopy(net) : net )
         # delete all hybedges other than i & j
         for k in 1:nhe
@@ -348,7 +349,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             qCF .+= prob .* qCF_subnet
             if symbolic
                 for i in 1:3
-                    qCFp[i] *= "((($deepcoalprobp * $(synth_e_dict[pgam])) * ($(synth_e_dict[gammaj]) * ($(synth_e_dict[(NaN,NaN,oneminusrho)])) + $(synth_e_dict[(NaN,NaN,inheritancecorrelation)]))) * ($(qCFps[i])))"
+                    qCFp[i] *= "((($deepcoalprobp * $(synth_e_dict[pgamtuple])) * ($(synth_e_dict[gammajtuple]) * ($(synth_e_dict[(NaN,NaN,oneminusrho)])) + $(synth_e_dict[(NaN,NaN,inheritancecorrelation)]))) * ($(qCFps[i])))"
                 end
             else
                 for i in 1:3
@@ -362,7 +363,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             qCF .+= prob .* (qCF_subnet .+ qCF_subnet[flipped_ij])
             if symbolic
                 for i in 1:3
-                    qCFp[i] *= "((($deepcoalprobp * $(synth_e_dict[pgam])) * $(synth_e_dict[gammaj]) * ($(synth_e_dict[(NaN,NaN,oneminusrho)]))) * ($(qCFps[i])+$(qCFps[flipped_ij[i]])))"
+                    qCFp[i] *= "((($deepcoalprobp * $(synth_e_dict[pgamtuple])) * $(synth_e_dict[gammajtuple]) * ($(synth_e_dict[(NaN,NaN,oneminusrho)]))) * ($(qCFps[i])+$(qCFps[flipped_ij[i]])))"
                 end
             else
                 for i in 1:3
