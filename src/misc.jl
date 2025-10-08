@@ -452,7 +452,6 @@ if ce.hybrid
     if pee.hybrid
         synth_e_dict[(p,c,ce.gamma)]=synth_e_dict[(PN.getparent(pee).number,PN.getchild(pee).number,pee.gamma)]
     elseif cee.hybrid
-      #``  display(synth_e_dict)
         synth_e_dict[(p,c,ce.gamma)]=synth_e_dict[(PN.getparent(cee).number,PN.getchild(cee).number,cee.gamma)]
     end
 end
@@ -512,17 +511,21 @@ pe1=deepcopy(pe)
         ce.isChild1 = true
         PhyloNetworks.setEdge!(pn,ce)
 
-if !(PN.getchild(ce).leaf) 
-f1=parse(BigInt,synth_e_dict[(pe1.number,PN.getparent(pe1).number, PN.getchild(pe1).number)])
-f2=parse(BigInt,synth_e_dict[(ce1.number,PN.getparent(ce1).number, PN.getchild(ce1).number)])
-synth_e_dict[(ce.number,PN.getparent(pe).number,PN.getchild(ce).number)]=string(f1+f2)
-synth_e_dict[(ce.number,PN.getchild(ce).number,PN.getparent(pe).number)]=string(f1+f2)
+if !PN.getchild(ce).leaf
+    f1 = parse(BigInt, synth_e_dict[(pe1.number, PN.getparent(pe1).number, PN.getchild(pe1).number)])
+    f2 = parse(BigInt, synth_e_dict[(ce1.number, PN.getparent(ce1).number, PN.getchild(ce1).number)])
+    sum_f = string(f1 + f2)
 
-synth_e_dict[(PN.getparent(pe).number,PN.getchild(ce).number,edge.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
-synth_e_dict[(PN.getchild(ce).number,PN.getparent(pe).number,edge.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
-synth_e_dict[(PN.getparent(pe).number,PN.getchild(ce).number,ce.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
-synth_e_dict[(PN.getchild(ce).number,PN.getparent(pe).number,ce.gamma)]=synth_e_dict[(PN.getparent(edge).number,PN.getchild(edge).number,edge.gamma)]
+    synth_e_dict[(ce.number, PN.getparent(pe).number, PN.getchild(ce).number)] = sum_f
+    synth_e_dict[(ce.number, PN.getchild(ce).number, PN.getparent(pe).number)] = sum_f
+
+    base_key = (PN.getparent(edge).number, PN.getchild(edge).number, edge.gamma)
+    synth_e_dict[(PN.getparent(pe).number, PN.getchild(ce).number, edge.gamma)] = synth_e_dict[base_key]
+    synth_e_dict[(PN.getchild(ce).number, PN.getparent(pe).number, edge.gamma)] = synth_e_dict[base_key]
+    synth_e_dict[(PN.getparent(pe).number, PN.getchild(ce).number, ce.gamma)]   = synth_e_dict[base_key]
+    synth_e_dict[(PN.getchild(ce).number, PN.getparent(pe).number, ce.gamma)]   = synth_e_dict[base_key]
 end
+
 
         PhyloNetworks.removeEdge!(pn,pe)
         # if (pe.number<ce.number) ce.number = pe.number; end # bad to match edges between networks
@@ -572,35 +575,37 @@ end
         PhyloNetworks.removeEdge!(n2,edge)
 
 if n2.hybrid
-    p1=PN.getparent(n2.edge[1])
-    c1=PN.getchild(n2.edge[1])
-    p2=PN.getparent(n2.edge[2])
-    c2=PN.getchild(n2.edge[2])
-    if !(c1.leaf) && !(c2.leaf)
-    f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
-    f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
-    synth_e_dict[(n2.edge[1].number,p1.number,p2.number)]=string(f1+f2)
-    synth_e_dict[(n2.edge[1].number,p2.number,p1.number)]=string(f1+f2)
+    p1, c1 = PN.getparent(n2.edge[1]), PN.getchild(n2.edge[1])
+    p2, c2 = PN.getparent(n2.edge[2]), PN.getchild(n2.edge[2])
+
+    if !c1.leaf && !c2.leaf
+        f1 = parse(BigInt, synth_e_dict[(n2.edge[1].number, p1.number, c1.number)])
+        f2 = parse(BigInt, synth_e_dict[(n2.edge[2].number, p2.number, c2.number)])
+        sum_f = string(f1 + f2)
+
+        synth_e_dict[(n2.edge[1].number, p1.number, p2.number)] = sum_f
+        synth_e_dict[(n2.edge[1].number, p2.number, p1.number)] = sum_f
     end
+
 else
-    p1=PN.getparent(n2.edge[1])
-    c1=PN.getchild(n2.edge[1])
-    p2=PN.getparent(n2.edge[2])
-    c2=PN.getchild(n2.edge[2])
-    if !(c1.leaf) && !(c2.leaf)
-    f1=parse(BigInt,synth_e_dict[(n2.edge[1].number,p1.number,c1.number)])
-    f2=parse(BigInt,synth_e_dict[(n2.edge[2].number,p2.number,c2.number)])
-        if (p1,c1)==(p2,c2)
-            synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1)
-            synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1)
-            #println("here?1")
+    p1, c1 = PN.getparent(n2.edge[1]), PN.getchild(n2.edge[1])
+    p2, c2 = PN.getparent(n2.edge[2]), PN.getchild(n2.edge[2])
+
+    if !c1.leaf && !c2.leaf
+        f1 = parse(BigInt, synth_e_dict[(n2.edge[1].number, p1.number, c1.number)])
+        f2 = parse(BigInt, synth_e_dict[(n2.edge[2].number, p2.number, c2.number)])
+
+        if (p1, c1) == (p2, c2)
+            value = string(f1)
         else
-            synth_e_dict[(n2.edge[1].number,p1.number,c2.number)]=string(f1+f2)
-            synth_e_dict[(n2.edge[1].number,c2.number,p1.number)]=string(f1+f2)
-            #println("here?2")
+            value = string(f1 + f2)
         end
+
+        synth_e_dict[(n2.edge[1].number, p1.number, c2.number)] = value
+        synth_e_dict[(n2.edge[1].number, c2.number, p1.number)] = value
     end
 end
+
         PhyloNetworks.deleteEdge!(net,edge,part=false)
         # remove n2 as appropriate later (recursively)   
         Qdeleteleaf!(net, n2.number,synth_e_dict; index=false, nofuse=nofuse,
@@ -612,99 +617,3 @@ end
     end
     return net
 end
-
-#=
-    """
-        binary(n::Int, binstr::String) -> String
-
-    Set the nth bit of a binary string to 1, returning the updated binary string.
-    If the input string is empty, returns a string of length `n` with the first bit set to 1 and the rest zeros.
-
-    Arguments:
-    - n::Int : The bit position to set (1-based, from the rightmost bit).
-    - binstr::String : A binary string. Can be empty.
-
-    Returns:
-    - String : The binary string with the nth bit set.
-
-    Examples:
-    - binary(3, "10") # returns "110"
-    - binary(5, "") # returns "10000"
-    """
-    function bina11ry(n::Int, binstr::String)
-        if isempty(binstr)
-            # If empty, create 1 followed by (n-1) zeros
-            return "1" * repeat("0", n-1)
-        end    
-        # Convert binary string to integer
-        original = parse(Int, binstr)#; base=2)    
-        # Set the nth bit to 1
-        new_value = original | (1 << (n-1))    
-        # Determine the minimum length: keep at least n bits
-        min_len = max(length(binstr), n)  
-        # Convert to binary string
-        new_binstr = string(new_value)#, base=2)
-        # Pad with leading zeros if necessary
-        if length(new_binstr) < min_len
-            new_binstr = lpad(new_binstr, min_len, '0')
-        end
-        return new_binstr
-    end
-=#
-
-#=
-    """
-        parameterDictionary1(net, inheritancecorrelation; gammaSymbol::String="r")
-
-    Creates a dictionary mapping inheritance probabilities (γ) and inheritance correlation (ρ) 
-    in a phylogenetic network to symbolic labels.
-
-    # Description
-    This function generates a dictionary of symbolic parameter labels for use in 
-    algebraic or likelihood-based calculations.
-
-    - **Inheritance probabilities (γ):**  
-    For each hybrid node, the two incoming edges are assigned labels:
-    - `"r_{j}"` for the first edge  
-    - `"(1-r_{j})"` for the second edge  
-    where `j` is the index of the hybrid node (1-based).  
-    Each `γ` value is rounded to `dpoints` decimal places before being used as a dictionary key.
-
-    - **Inheritance correlation (ρ):**  
-    The provided `inheritancecorrelation` value is assigned the label `"&rho"`.  
-    Its complement, `1 - ρ`, is rounded and assigned the label `"1-&rho"`.
-
-    This function assumes each hybrid node has exactly two incoming edges, and will 
-    throw an error otherwise.
-
-    # Arguments
-    - `net::PhyloNetworks.HybridNetwork`: The input network object.
-    - `inheritancecorrelation::Float64`: The inheritance correlation value.
-    - `gammaSymbol::String="r"`: Optional prefix for inheritance probability labels.
-
-    # Returns
-    - `Dict{Any, String}`: A dictionary mapping numerical parameter values to symbolic labels.
-    """
-    function paramesssterDictionary1(net, inheritancecorrelation; gammaSymbol="r_"::String)
-        dict = Dict()
-
-        # Dictionary for inheritance probabilities (γ)
-        hybridNodeNumbers = [n.number for n in net.node if n.hybrid]
-        for (j, hybNode) in enumerate(hybridNodeNumbers)
-            incoming = [e for e in net.edge if PhyloNetworks.getchild(e).number == hybNode]
-            if length(incoming) != 2
-                error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
-            end
-            for (k, e) in enumerate(incoming)
-                e.gamma = round(e.gamma, digits=dpoints)
-                dict[e.gamma] = k == 1 ? "$gammaSymbol{$j}" : "(1-$gammaSymbol{$j})"
-            end
-        end
-
-        # Inheritance correlation (ρ)
-        dict[inheritancecorrelation] = "rho"
-        dict[round(1 - inheritancecorrelation, digits=dpoints)] = "1-rho"
-        
-        return dict
-    end
-=#
