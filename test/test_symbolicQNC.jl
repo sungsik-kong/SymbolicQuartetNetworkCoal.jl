@@ -3,12 +3,12 @@ const eLab="t_"
 const rLab="r_"
 const dpoints=10
 
-for rep in 1:4
+for rep in 1:1
 
     @testset begin
         threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
         ih=0.1 #inheritancecorrelation
-        filename=["topologies_n5_l1.txt","topologies_n5_l2.txt","sim_nets.txt"]
+        filename=["topologies_n5_l1.txt","topologies_n5_l2.txt"]#,"sim_nets.txt"]
         count1=0
 
         function parameterDictionary1REV(testnet, ih)
@@ -66,7 +66,7 @@ for rep in 1:4
             end
         end
     end
-                    #println("Network in $afile [$count]: $(PhyloNetworks.writeTopology(testnet))")
+                    println("Network in $afile [$count]: $(PhyloNetworks.writeTopology(testnet))")
 
                     revdict=parameterDictionary1REV(testnet,ih)                    
 
