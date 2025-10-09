@@ -245,7 +245,7 @@ function sqnc_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false
         # but later its edges turned to be hybrids, so should not be removed
         isnothing(i) || Qfuseedgesat!(i, net, dict)
     end
-    return net,dict
+    return net
 end
 
 function Qdeleteleaf!(net::HybridNetwork, node::PhyloNetworks.Node, synth_e_dict; kwargs...)
