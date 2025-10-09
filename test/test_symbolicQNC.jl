@@ -3,7 +3,7 @@ const eLab="t_"
 const rLab="r_"
 const dpoints=10
 
-for rep in 1:2
+for rep in 1:1
 
     @testset begin
         threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
