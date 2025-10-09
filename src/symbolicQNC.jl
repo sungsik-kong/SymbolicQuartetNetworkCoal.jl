@@ -27,7 +27,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
     for e in net.edge
         synth_e_dict[(e.number,PN.getparent(e).number, PN.getchild(e).number)]="1" * repeat("0", e.number-1)
     end
-    
+
     net.node[net.root].leaf && error("The root can't be a leaf.")
     PN.check_nonmissing_nonnegative_edgelengths(net,"Edge lengths are needed in coalescent units to calcualte expected CFs.")
     all(e.gamma >= 0.0 for e in net.edge) || error("some γ's are missing for hybrid edges: can't calculate expected CFs.")
@@ -70,6 +70,8 @@ function network_expectedCF_formulas(net::HybridNetwork;
         end
     end
     showprogressbar && print("\n")
+
+#for (key, value) in synth_e_dict println("$key => $value") end
 
     return quartet, taxa, df
 end
@@ -234,7 +236,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         (sistertofirst == 3 ? (qCFp[1]*="$minorcfp",qCFp[2]*="$majorcfp",qCFp[3]*="$minorcfp") :
                               (qCFp[1]*="$minorcfp",qCFp[2]*="$minorcfp",qCFp[3]*="$majorcfp") ))                      
         qCFp .*= ")" #kong: end qCF with an closing bracket      
-        return qCF, qCFp, synth_e_dict
+        return qCF, qCFp
     end
     ndes > 0 || error("weird: hybrid node has no descendant taxa")
     # by now, there are 1 or 2 taxa below the lowest hybrid
@@ -267,7 +269,7 @@ ei=parenthedge[i]
             
         end
             qCFp .*= ")"
-        return qCF, qCFp, synth_e_dict
+        return qCF, qCFp
     end
     # by now: 2 descendant below the lowest hybrid node: hardest case
     # weighted qCFs average of 3 networks: 2 displayed, 1 "parental" (unless same parents)
