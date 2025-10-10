@@ -1,11 +1,10 @@
 module SymbolicQuartetNetworkCoal
     using CSV
     using DataFrames
-    using Dates
+    #using Dates
     using PhyloNetworks
     using StaticArrays
     import Random
-    using Logging        
 
     const dpoints=10 #decimal points for all parameters when randomly generated
     const eLab="t_"
