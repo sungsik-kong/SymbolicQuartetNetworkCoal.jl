@@ -199,7 +199,103 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
     return sort!(params)
 end
+
+
+"""
+    makeEdgeLabel_v3(net; showTerminalEdgeLabels=false)
+
+Generates a dataframe mapping edge numbers to their symbolic labels.
+
+## Description
+This function creates labels for the edges of a `HybridNetwork` in the format `"te"`, where `e` is the edge number.  
+By default, labels are only assigned to **non-terminal edges** (i.e., edges that do not end at leaf nodes).  
+The dataframe returned is used as input for PhyloPlots' option `edgelabel=`. 
+Setting `showTerminalEdgeLabels=true` includes labels for terminal edges as well.
+This function is only used for pretty plotting of the network with PhyloPlots.
+
+## Arguments
+- `net`: A `HybridNetwork` object.
+- `showAllEdgeLabels`: A boolean flag (default = `false`).  
+   - `false`: Excludes terminal edges, hybrid edges with one leaf descendant, 
+                and terminal edges with parent the root.  
+   - `true`: Includes all edges.  
+
+## Returns
+- A `DataFrame` with columns:
+  - `number`: Edge numbers.
+  - `label`: Corresponding symbolic labels (`"t1, γ = g1"`).
+"""
+function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::Bool=false)
+  
+  # get internal edge numbers unless want all edges labeled
+  edge_numbers_to_include = [e.number for e in net.edge if !PhyloNetworks.getchild(e).leaf || showAllEdgeLabels]
+  
+  #  ESA: probably don't ready need both of the above vectors, but keeping both to use SK's code
+  # possibly remove some edges from list if not needed in symbolic parameterization
+  hybridNodeInds = findall(n -> n.hybrid, net.node)
+  hybridNodeNumbers = [n.number for n in net.node[hybridNodeInds]]
     
+  if !showAllEdgeLabels
+
+    edge_numbers_to_remove = []
+    
+    # first check if root is parent of leaf.  If so, do not label two descendant edges.
+    if findfirst(e -> getchild(e).leaf, net.node[net.root].edge) !== nothing
+      edge_numbers_to_remove = [e.number for e in net.node[net.root].edge]
+    end
+    
+    # now check if hyrid nodes have only one descendant.  If so, do not use edge lengths.
+    hybridNodesWithOneLeafDescendant = [n for n in net.node[hybridNodeInds] if getchild(n).leaf]
+    for n in hybridNodesWithOneLeafDescendant
+      push!(edge_numbers_to_remove, getparentedge(n).number)
+      push!(edge_numbers_to_remove, getparentedgeminor(n).number)
+    end
+
+    # get hybrid edge numbers for including the gammas in the label
+    gamma_df = DataFrame(number=Int[],label=String[])
+    for (j, hybNode) in enumerate(hybridNodeNumbers)    
+      incoming = [e.number for e in net.edge if PhyloNetworks.getchild(e).number == hybNode]
+      if length(incoming) != 2
+        error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
+      end
+      for (k, eNum) in enumerate(incoming)
+        label = k == 1 ? "γ = " * rLab*"{$j}" : "1-γ = " * "1 - "*rLab*"{$j}"
+        push!(gamma_df, (number = eNum, label = label))      
+      end
+    end
+
+    if !isempty(edge_numbers_to_remove)
+      setdiff!(edge_numbers_to_include, edge_numbers_to_remove)
+    end
+  end
+  
+  df = DataFrame(
+    number=[num for num in edge_numbers_to_include],
+    label=["t_{$num}" for num in edge_numbers_to_include]
+  )
+
+  # merge dataframes 
+  for eNum in gamma_df.number
+      ind2 = findfirst(gamma_df.number .== eNum)
+      if eNum in df.number
+          ind1 = findfirst(df.number .== eNum)
+          df.label[ind1] *= ", " * gamma_df.label[ind2]
+      else
+          push!(df,(number=eNum,label=gamma_df.label[ind2]))
+      end
+  end
+
+  # use prettier labels for edge labels
+  subs = Dict("{" => "", "}" => "","_"=>"")
+  for (k,v) in subs
+      df.label .= replace.(df.label,k=>v)
+  end
+
+  return df
+end
+
+
+
 """
     makeEdgeLabel(net; showTerminalEdgeLabels=false)
 
