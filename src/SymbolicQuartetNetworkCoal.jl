@@ -17,6 +17,7 @@ module SymbolicQuartetNetworkCoal
     reformat_export,
     readTopologyrand,
     network_expectedCF_formulas,
+    makeEdgeLabel_v3,
     makeEdgeLabel,
     assignBinaryEdgeLengths
         
