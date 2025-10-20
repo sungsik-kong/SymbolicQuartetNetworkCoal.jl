@@ -35,7 +35,7 @@ that are suitable for testing or downstream processing, but not meant to represe
 function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer=dpoints)
     #---------read in topology: input is either newick string or HybridNetwork object---------#
     if net isa PhyloNetworks.HybridNetwork
-    else net=PhyloNetworks.readTopology(net) end
+    else net=PhyloNetworks.readnewick(net) end
     #--------generate arbitrary edge lengths--------#
     for e in net.edge e.length=round(scaleparameter*(1+rand()),digits=decimalpoints) end #edge lengths <1, may be more realistic values
     #for e in net.edge e.length=round((scaleparameter*(e.number+0.01)),digits=dpoints) end #this option makes it easier to keep track of elengths during debugging
@@ -43,7 +43,7 @@ function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer
     #----preambles----#
     reticulatenodeindex=Int[]
     nedge=length(net.edge)
-    nreticulate=net.numHybrids
+    nreticulate=net.numhybrids
     gammavec=zeros(nreticulate)
     #getting hybrid node index numbers
     for n in net.node n.hybrid && push!(reticulatenodeindex,n.number) end
@@ -240,8 +240,8 @@ function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::B
     edge_numbers_to_remove = []
     
     # first check if root is parent of leaf.  If so, do not label two descendant edges.
-    if findfirst(e -> getchild(e).leaf, net.node[net.root].edge) !== nothing
-      edge_numbers_to_remove = [e.number for e in net.node[net.root].edge]
+    if findfirst(e -> getchild(e).leaf, net.node[net.rooti].edge) !== nothing
+      edge_numbers_to_remove = [e.number for e in net.node[net.rooti].edge]
     end
     
     # now check if hyrid nodes have only one descendant.  If so, do not use edge lengths.
@@ -388,12 +388,12 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
     elseif nodeidegree == 1
         pe = nodei.edge[1]
         pn = PhyloNetworks.getOtherNode(pe, nodei) # parent node of leaf
-        if net.root == i && keeporiginalroot
+        if net.rooti == i && keeporiginalroot
             return nothing
         end
         # keep nodei if pn is a leaf: keep 1 edge for the single remaining leaf
         if pn.leaf
-            net.root = i # it should have been i before anyway
+            net.rooti = i # it should have been i before anyway
             length(net.edge)==1 || error("neighbor of degree-1 node $(nodei.name) is a leaf, but network had $(length(net.edge)) edges (instead of 1).")
             length(pn.edge)==1 || error("neighbor of $(nodei.name) is a leaf, incident to $(length(pn.edge)) edges (instead of 1)")
             return nothing
@@ -402,10 +402,10 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
         PhyloNetworks.removeNode!(pn,pe)  # perhaps useless. in case gc() on pe affects pn
         PhyloNetworks.removeEdge!(pn,pe)
         PhyloNetworks.deleteEdge!(net,pe,part=false)
-        if net.root==i # if node was the root, new root = pn
-            net.root = findfirst(x -> x===pn, net.node)
+        if net.rooti==i # if node was the root, new root = pn
+            net.rooti = findfirst(x -> x===pn, net.node)
         end
-        PhyloNetworks.deleteNode!(net,nodei) # this updates the index net.root
+        PhyloNetworks.deleteNode!(net,nodei) # this updates the index net.rooti
         Qdeleteleaf!(net, pn.number, synth_e_dict; nofuse = nofuse, simplify=simplify, unroot=unroot, multgammas=multgammas,
                     keeporiginalroot=keeporiginalroot)
         return nothing
@@ -414,7 +414,7 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
         return nothing
     end
     # if we get to here, nodei has degree 2 exactly: --e1-- nodei --e2--
-    if i==net.root && (keeporiginalroot || !unroot)
+    if i==net.rooti && (keeporiginalroot || !unroot)
         return nothing # node = root of degree 2 and we want to keep it
     end
     e1 = nodei.edge[1]
@@ -424,7 +424,7 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
         cn2 = PhyloNetworks.getchild(e2)
         if !(nodei ≡ cn && nodei ≡ cn2) # nodei *not* the child of both e1 and e2
             # possible at the root, in which case e1,e2 should have same child
-            (i==net.root && cn ≡ cn2) ||
+            (i==net.rooti && cn ≡ cn2) ||
                 error("after removing descendants, node $(nodei.number) has 2 hybrid edges but is not the child of both.")
             # delete e1,e2,nodei and move the root to their child cn
             cn.hybrid || error("child node $(cn.number) of hybrid edges $(e1.number) and $(e2.number) should be a hybrid.")
@@ -432,14 +432,14 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
             any(PhyloNetworks.getchild(e) ≡ cn && e !== e1 && e !==e2 for e in cn.edge) &&
                 error("root has 2 hybrid edges, but their common child has an extra parent")
             PhyloNetworks.removeEdge!(cn,e1); PhyloNetworks.removeEdge!(cn,e2)
-            PhyloNetworks.removeHybrid!(net,cn) # removes cn from net.hybrid, updates net.numHybrids
-            cn.hybrid = false # !! allowrootbelow! not called: would require correct isChild1
+            PhyloNetworks.removeHybrid!(net,cn) # removes cn from net.hybrid, updates net.numhybrids
+            cn.hybrid = false # !! allowrootbelow! not called: would require correct ischild1
             empty!(e1.node); empty!(e2.node)
             PhyloNetworks.deleteEdge!(net,e1,part=false); PhyloNetworks.deleteEdge!(net,e2,part=false)
             empty!(nodei.edge)
             PhyloNetworks.deleteNode!(net,nodei)
-            net.root = findfirst(x -> x ≡ cn, net.node)
-            Qdeleteleaf!(net, net.root, synth_e_dict; index=true, nofuse=nofuse, simplify=simplify,
+            net.rooti = findfirst(x -> x ≡ cn, net.node)
+            Qdeleteleaf!(net, net.rooti, synth_e_dict; index=true, nofuse=nofuse, simplify=simplify,
                 unroot=unroot, multgammas=multgammas, keeporiginalroot=keeporiginalroot)
             return nothing
         end
@@ -451,7 +451,7 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
         PhyloNetworks.removeNode!(p1,e1);  PhyloNetworks.removeNode!(p2,e2) # perhaps useless
         PhyloNetworks.removeEdge!(p1,e1);  PhyloNetworks.removeEdge!(p2,e2)
         PhyloNetworks.deleteEdge!(net,e1,part=false); PhyloNetworks.deleteEdge!(net,e2,part=false)
-        if net.root==i net.root=getIndex(p1,net); end # should never occur though.
+        if net.rooti==i net.rooti=getIndex(p1,net); end # should never occur though.
         PhyloNetworks.deleteNode!(net,nodei)
         # recursive call on both p1 and p2.
         Qdeleteleaf!(net, p1.number, synth_e_dict; nofuse = nofuse, simplify=simplify, unroot=unroot,
@@ -472,12 +472,12 @@ function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
             if pn ≡ PhyloNetworks.getparent(e2)
                 # e1 and e2 have same child and same parent. Remove e1.
                 e2.hybrid = false # assumes bicombining at cn: no third hybrid parent
-                e2.isMajor = true
+                e2.ismajor = true
                 e2.gamma = PhyloNetworks.addBL(e1.gamma, e2.gamma)
                 PhyloNetworks.removeEdge!(pn,e1); PhyloNetworks.removeEdge!(cn,e1)
                 PhyloNetworks.deleteEdge!(net,e1,part=false)
-                PhyloNetworks.removeHybrid!(net,cn) # removes cn from net.hybrid, updates net.numHybrids
-                cn.hybrid = false # !! allowrootbelow! not called: would require correct isChild1
+                PhyloNetworks.removeHybrid!(net,cn) # removes cn from net.hybrid, updates net.numhybrids
+                cn.hybrid = false # !! allowrootbelow! not called: would require correct ischild1
                 # call recursion again because pn and/or cn might be of degree 2 (or even 1).
                 Qdeleteleaf!(net, cn.number, synth_e_dict; nofuse = nofuse, simplify=simplify, unroot=unroot,
                             multgammas=multgammas, keeporiginalroot=keeporiginalroot)
@@ -508,7 +508,7 @@ pee=deepcopy(pe)
     ce = nodei.edge[j==1 ? 2 : 1]
 cee=deepcopy(ce)
     if pe.hybrid       # unless it's a hybrid: should be --tree--> node i --hybrid-->
-        (ce,pe) = (pe,ce) # keep the hybrid edge: keep its isMajor
+        (ce,pe) = (pe,ce) # keep the hybrid edge: keep its ismajor
     end
     isnodeiparent = (nodei ≡ getparent(ce))
     (!ce.hybrid || isnodeiparent) ||
@@ -520,18 +520,18 @@ cee=deepcopy(ce)
     PN.removeNode!(pn,pe)    # perhaps useless. in case gc() on pe affects its nodes.
     PN.setEdge!(pn,ce)
     PN.setNode!(ce,pn)       # pn comes 2nd in ce now: ce.node is: [original, pn]
-    ce.isChild1 = isnodeiparent # to retain same direction as before.
+    ce.ischild1 = isnodeiparent # to retain same direction as before.
     ce.length = PN.addBL(ce.length, pe.length)
     if multgammas
         ce.gamma = PN.multiplygammas(ce.gamma, pe.gamma)
     end
-    if net.root==i # isnodeiparent should be true, unless the root and ce's direction were not in sync
+    if net.rooti==i # isnodeiparent should be true, unless the root and ce's direction were not in sync
         newroot = pn
         if newroot.leaf && !ce.hybrid # then reverse ce's direction. pn.leaf and ce.hybrid should never both occur!
             newroot = ce.node[1] # getOtherNode(ce, pn)
-            ce.isChild1 = false
+            ce.ischild1 = false
         end
-        net.root = findfirst(isequal(newroot), net.node)
+        net.rooti = findfirst(isequal(newroot), net.node)
     end
     PN.deleteNode!(net,nodei)
     PN.deleteEdge!(net,pe,part=false) # do not update partitions. irrelevant for networks of level>1.
@@ -588,9 +588,9 @@ function Qdeletehybridedge!(
             if !e.hybrid || n1===getparent(e)  ce = e; end # does *not* assume correct ischild1 for tree edges :)
         end
         pn = PhyloNetworks.getparent(pe); # parent node of n1, other than n2
-        atRoot = (net.node[net.root] ≡ n1) # n1 should not be root, but if so, pn will be new root
+        atRoot = (net.node[net.rooti] ≡ n1) # n1 should not be root, but if so, pn will be new root
         # if pe may contain the root, then allow the root on ce and below
-        if pe.containRoot
+        if pe.containroot
             PhyloNetworks.allowrootbelow!(ce) # warning: assumes correct `ischild1` for ce and below
         end
         # next: replace ce by pe+ce, detach n1 from pe & ce, remove pe from network.
@@ -604,7 +604,7 @@ pe1=deepcopy(pe)
 
         PhyloNetworks.removeNode!(n1,ce) # ce now has 1 single node cn
         PhyloNetworks.setNode!(ce,pn)    # ce now has 2 nodes in this order: cn, pn
-        ce.isChild1 = true
+        ce.ischild1 = true
         PhyloNetworks.setEdge!(pn,ce)
 
 if !PN.getchild(ce).leaf
@@ -629,7 +629,7 @@ end
         PhyloNetworks.deleteEdge!(net,pe,part=false) # decreases net.numedges   by 1
         PhyloNetworks.removeHybrid!(net,n1) # decreases net.numhybrids by 1
         n1.hybrid = false
-        edge.hybrid = false; edge.isMajor = true
+        edge.hybrid = false; edge.ismajor = true
         # n1 not leaf, and not added to net.leaf, net.numtaxa unchanged
         if atRoot
             i = findfirst(x -> x===pn, net.node)
@@ -640,19 +640,19 @@ end
     else # n1 has 4+ edges (polytomy) or 3 edges but we want to keep it anyway:
         # keep n1 but detach it from 'edge', set its remaining parent to major tree edge
         pe = getpartneredge(edge, n1) # partner edge: keep it this time
-        if !pe.isMajor pe.isMajor=true; end
+        if !pe.ismajor pe.ismajor=true; end
         pe.hybrid = false
         # note: pe.gamma *not* set to 1.0 here
         PhyloNetworks.removeEdge!(n1,edge) # does not update n1.hybrid at this time
         PhyloNetworks.removeHybrid!(net,n1) # removes n1 from net.hybrid, updates net.numhybrids
         n1.hybrid = false
-        if pe.containRoot
+        if pe.containroot
             PhyloNetworks.allowrootbelow!(pe) # warning: assumes correct `ischild1` for pe and below
         end
         # below: won't delete n1, delete edge instead
     end
 
-    formernumhyb = net.numHybrids
+    formernumhyb = net.numhybrids
     # next: delete n1 recursively, or delete edge and delete n2 recursively.
     # keep n2 if it has 4+ edges (or if nofuse). 1 edge should never occur.
     #       If root, would have no parent: treat network as unrooted and change the root.
@@ -708,7 +708,7 @@ end
                     simplify=simplify, unroot=unroot, multgammas=multgammas,
                     keeporiginalroot=keeporiginalroot)
     end
-    if net.numHybrids != formernumhyb # deleteleaf! does not update containroot
+    if net.numhybrids != formernumhyb # deleteleaf! does not update containroot
         PhyloNetworks.allowrootbelow!(net)
     end
     return net

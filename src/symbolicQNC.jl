@@ -28,7 +28,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
         synth_e_dict[(e.number,PN.getparent(e).number, PN.getchild(e).number)]="1" * repeat("0", e.number-1)
     end
 
-    net.node[net.root].leaf && error("The root can't be a leaf.")
+    net.node[net.rooti].leaf && error("The root can't be a leaf.")
     PN.check_nonmissing_nonnegative_edgelengths(net,"Edge lengths are needed in coalescent units to calcualte expected CFs.")
     all(e.gamma >= 0.0 for e in net.edge) || error("some γ's are missing for hybrid edges: can't calculate expected CFs.")
     inheritancecorrelation >= 0 || error("the inheritance correlation should be non-negative")
@@ -40,6 +40,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
     numq=binomial(ntax,4)
     quartet = Vector{PN.QuartetT{qtype}}(undef, numq)
     ts = [1,2,3,4]
+    # ESA get taxon sets
     for qi in 1:numq
         quartet[qi] = PN.QuartetT(qi, SVector{4}(ts), MVector(0.,0.,0.))
         # next: find the 4-taxon set with the next rank,
@@ -60,6 +61,8 @@ function network_expectedCF_formulas(net::HybridNetwork;
         nextstar = Integer(ceil(nquarnets_perstar))
     end
     for qi in 1:numq
+
+        # ESA got to
         network_expectedCF!(quartet[qi], net, taxa, taxonnumber, inheritancecorrelation, df, symbolic, synth_e_dict)
         if showprogressbar && qi >= nextstar
             print("*")
@@ -153,13 +156,15 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     qCFp .*= "("         
     deleteaboveLSA!(net)
     # make sure the root is of degree 3+
-    if length(net.node[net.root].edge) <= 2
-        Qfuseedgesat!(net.root, net,synth_e_dict)
+    if length(net.node[net.rooti].edge) <= 2
+        Qfuseedgesat!(net.rooti, net,synth_e_dict)
     end
     # find and delete degree-2 blobs along external edges
     bcc = biconnectedComponents(net, true) # true: ignore trivial blobs
     entry = PN.biconnectedcomponent_entrynodes(net, bcc)
-    entryindex = indexin(entry, net.nodes_changed)
+    # ESA taking a guess here
+    # entryindex = indexin(entry, net.nodes_changed)
+    entryindex = indexin(entry, net.vec_node)
     exitnodes = PN.biconnectedcomponent_exitnodes(net, bcc, false) # don't redo the preordering
     bloborder = sortperm(entryindex) # pre-ordering for blobs in their own blob tree
     
@@ -173,7 +178,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     for ib in reverse(bloborder)  
         isexternal(ib) || continue # keep bcc[ib] if not external of degree 2
         for he in bcc[ib]
-            he.isMajor && continue
+            he.ismajor && continue
             # deletion of a hybrid can hide the deletion of another: check that he is still in net
             any(e -> e===he, net.edge) || continue
             # delete minor hybrid edge with options unroot=true: to make sure the
@@ -183,10 +188,12 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         end
     end
     ndes = 4 # number of taxa descendant from lowest hybrid node
-    if net.numHybrids > 0
+    if net.numhybrids > 0
         preorder!(net)
         # find a lowest hybrid node and # of taxa below it
-        hyb = net.nodes_changed[findlast(n -> n.hybrid, net.nodes_changed)]
+        # ESA
+        # hyb = net.nodes_changed[findlast(n -> n.hybrid, net.nodes_changed)]
+        hyb = net.vec_node[findlast(n -> n.hybrid, net.vec_node)]
         funneledge = [e for e in hyb.edge if PhyloNetworks.getparent(e) === hyb]
         ispolytomy = length(funneledge) > 1
         funneldescendants = union([PN.descendants(e) for e in funneledge]...)
@@ -197,10 +204,10 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     if ndes > 2 # simple formula for qCF: find cut edge and its length
         # inheritance correlation has no impact
         # pool of cut edges below. contains NO external edge, bc n2 not leaf (if reticulation), nice tree ow
-        cutpool = (net.numHybrids == 0 ? net.edge :
+        cutpool = (net.numhybrids == 0 ? net.edge :
                     [e for e in n2.edge if PN.getparent(e) === n2])
         filter!(e -> !PhyloNetworks.getchild(e).leaf, cutpool)
-        net.numHybrids > 0 || length(cutpool) <= 1 ||
+        net.numhybrids > 0 || length(cutpool) <= 1 ||
             error("2+ cut edges, yet 4-taxon tree, degree-3 root and no degree-2 nodes. taxa: $(fourtaxa)")
         sistertofirst = 2    # arbitrarily correct if 3-way polytomy (no cut edge)
         internallength = 0.0 # correct if polytomy
@@ -334,7 +341,7 @@ gammajtuple=(PN.getparent(ei).number,PN.getchild(ei).number,gammaj)
             ce2 = simplernet.edge[ce2_index]
             PN.removeEdge!(hn,ce2)
             hn_index = findfirst(x -> x === hn, ce2.node)
-            ce2.node[hn_index] = pn # ce2.isChild1 remains synchronized
+            ce2.node[hn_index] = pn # ce2.ischild1 remains synchronized
             push!(pn.edge, ce2)
             # then delete hybedge j
             simplernet=Qdeletehybridedge!(simplernet, pej,synth_e_dict, false,true,false,false,false) # ., unroot=true,., simplify=false,.)
