@@ -1,0 +1,2 @@
+function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
+  line 162:  need to make more general (hard-coded as r_)

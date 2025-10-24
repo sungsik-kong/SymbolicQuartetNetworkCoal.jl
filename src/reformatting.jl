@@ -18,6 +18,8 @@ function reformat_export(net, df;
     numCFs=size(df)[1]
     dataframe=deepcopy(df)
     params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
+    # ESA
+    println(params)
     
     function rationalize(x;sigdigits=16)
         rational=string(Int(round(x*10^(sigdigits-1),digits=0))//10^(sigdigits-1))
@@ -116,7 +118,6 @@ str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrela
     end
 
     if(singular)
-        #filename*="_macaulay"
         open("$filename.sing", "w") do file
         str="ring R = 0, ("
         for par in params str=str*par*"," end

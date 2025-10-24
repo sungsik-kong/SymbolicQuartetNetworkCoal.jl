@@ -177,6 +177,10 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
             end
         end
 
+        # ESA
+        print("  Should have t_{e}: " * string(length(expressions)))
+        
+
         for e in 1:retnumber
             if occursin("r_{$e}", df[i, 2])
                 push!(expressions, "R$e")
@@ -185,8 +189,10 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
         append!(params, expressions)
     end
-
     params = unique(params)
+    
+    # ESA
+    foreach(x -> println(x),params)
 
     # Replace symbolic expressions in CF equations
     for cf in 1:numCFs
