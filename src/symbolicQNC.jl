@@ -2,8 +2,13 @@ function network_expectedCF_formulas(net::HybridNetwork;
                             showprogressbar=false, 
                             inheritancecorrelation=0, 
                             symbolic=false::Bool)
-    df = DataFrame(Split=String[], CF=String[]) 
+    
+    # ESA -- possible fix to network edge number problem.  This requires the user to reset the edge numbers, and
+    # therefore we do not need to add a ! to the function name.
+    sort([e.number for e in net.edge])[end] == length(net.edge) || error("The edges are not numbered consecutively from 1 to $(length(net.edge)).  Please run PhyloNetworks.resetedgenumbers!() first.  Exiting.")
 
+    # data frame for CFs and dictionary translation
+    df = DataFrame(Split=String[], CF=String[]) 
     synth_e_dict = Dict()
 
     # Dictionary for inheritance probabilities (γ)

@@ -256,8 +256,6 @@ function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::B
   # get internal edge numbers unless want all edges labeled
   edge_numbers_to_include = [e.number for e in net.edge if !PhyloNetworks.getchild(e).leaf || showAllEdgeLabels]
   
-  #  ESA: probably don't ready need both of the above vectors, but keeping both to use SK's code
-  # possibly remove some edges from list if not needed in symbolic parameterization
   hybridNodeInds = findall(n -> n.hybrid, net.node)
   hybridNodeNumbers = [n.number for n in net.node[hybridNodeInds]]
     

@@ -1,0 +1,22 @@
+misc.jl:function readTopologyrand(net;scaleparameter::Float64=1.0,decimalpoints::Integer=dpoints)
+misc.jl:function aloha(;scale::Int=1)
+misc.jl:    function scale_ascii_art(art::String; scale::Int=scale)
+misc.jl:function binary_to_tstring(binary_str::String; edge_label=eLab::String)
+misc.jl:function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
+misc.jl:function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::Bool=false)
+misc.jl:function makeEdgeLabel(net; showTerminalEdgeLabels=false)
+misc.jl:function sqnc_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false)
+misc.jl:function Qdeleteleaf!(net::HybridNetwork, node::PhyloNetworks.Node, synth_e_dict; kwargs...)
+misc.jl:function Qdeleteleaf!(net::HybridNetwork, nodeName::AbstractString, synth_e_dict; kwargs...)
+misc.jl:function Qdeleteleaf!(net::HybridNetwork, nodeNumber::Integer, synth_e_dict;
+misc.jl:function Qfuseedgesat!(i::Integer, net::HybridNetwork, synth_e_dict, multgammas=false::Bool)
+misc.jl:function Qdeletehybridedge!(
+
+reformatting.jl:function export_csv(df; filename="sqnc_output"::String)
+reformatting.jl:function reformat_export(net, df;
+reformatting.jl:    function rationalize(x;sigdigits=16)
+
+symbolicQNC.jl:function network_expectedCF_formulas(net::HybridNetwork; 
+symbolicQNC.jl:function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
+symbolicQNC.jl:function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorrelation, qCFp, symbolic,synth_e_dict)
+symbolicQNC.jl:        function isexternal(ib) # is bcc[ib] of degree 2 and adjacent to an external edge?
