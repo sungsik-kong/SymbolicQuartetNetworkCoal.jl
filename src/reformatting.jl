@@ -1,10 +1,10 @@
-function export_csv(df; filename="sqnc_output"::String)
+function export_csv(df; filename="symCF_output"::String)
     CSV.write("$filename.csv",df,header=false)
 end
 
 function reformat_export(net, df;
                             inheritancecorrelation=0.0::Float64,
-                            filename="sqnc_output"::String,
+                            filename="symCF_output"::String,
                             csv=true::Bool,
                             macaulay=false::Bool,
                             matlab=false::Bool,
