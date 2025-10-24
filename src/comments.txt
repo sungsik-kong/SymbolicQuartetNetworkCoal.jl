@@ -1,6 +1,0 @@
-function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
-  line 162ff:  need to make more general (hard-coded as r_)  [I had changed to g_]
-
-  something odd is happening.  Not sure what.  Currently printing out params.
-
-      
