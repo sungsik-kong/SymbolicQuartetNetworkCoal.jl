@@ -160,6 +160,21 @@ Additionally, it extracts and returns a **sorted list of unique symbolic paramet
 - A sorted vector of unique symbolic parameters used in the CF equations.
 """   
 function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
+    # ESA
+    # need to get the numbers of the edges.  My test network has numbers:
+    # julia> foreach(x -> println(x.number), ntwk_X.edge)
+# 7
+# 8
+# 20
+# 21
+# 22
+# 23
+# 24
+# 25
+# 26
+# 27
+# 28
+# so edgenumber does not work.  It's also sort of a problem for the strings.
     edgenumber = length(net.edge)
     retnumber = length(net.hybrid)
     numCFs = size(df, 1)
@@ -171,8 +186,13 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
         record = false
         expressions = String[]
 
+        println(1:edgenumber)
         for e in 1:edgenumber
+            # ESA
+            println(string(e) * "   -t_{$e}")
             if occursin("-t_{$e}", df[i, 2])
+                # ESA
+                println(string(e) * " " * df[i,2])
                 push!(expressions, "X$e")
             end
         end
