@@ -174,7 +174,7 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 # 26
 # 27
 # 28
-# so edgenumber does not work.  It's also sort of a problem for the strings.
+# so 1:edgenumber does not work.  It's also sort of a problem for the strings.
     edgenumber = length(net.edge)
     retnumber = length(net.hybrid)
     numCFs = size(df, 1)
@@ -186,20 +186,11 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
         record = false
         expressions = String[]
 
-        println(1:edgenumber)
         for e in 1:edgenumber
-            # ESA
-            println(string(e) * "   -t_{$e}")
             if occursin("-t_{$e}", df[i, 2])
-                # ESA
-                println(string(e) * " " * df[i,2])
                 push!(expressions, "X$e")
             end
         end
-
-        # ESA
-        print("  Should have t_{e}: " * string(length(expressions)))
-        
 
         for e in 1:retnumber
             if occursin("r_{$e}", df[i, 2])
@@ -210,9 +201,6 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
         append!(params, expressions)
     end
     params = unique(params)
-    
-    # ESA
-    foreach(x -> println(x),params)
 
     # Replace symbolic expressions in CF equations
     for cf in 1:numCFs
