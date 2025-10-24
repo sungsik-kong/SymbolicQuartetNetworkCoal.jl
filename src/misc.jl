@@ -145,7 +145,7 @@ Transforms numerical values in the concordance factor (CF) equations into symbol
 This function updates a dataframe (`df`) containing CF equations by replacing:
 - The inheritance correlation `"rho"` with its numerical value.
 - Edge-related terms `"-t_{e}"` with `"X{e}"`.
-- Hybrid-related terms `"r_{e}"` with `"R{e}"`.
+- Hybrid-related terms `"g_{e}"` with `"G{e}"`.
 - Exponential terms `"exp(-t_{e})"` into `"(X{e}"`.
 - Other symbolic replacements for consistency.
 
@@ -179,6 +179,11 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
     retnumber = length(net.hybrid)
     numCFs = size(df, 1)
     
+    # define letters to be used
+    gletter = SymbolicQuartetNetworkCoal.gLab[1]
+    eletter = SymbolicQuartetNetworkCoal.eLab[1]
+    println("g and e letters: " * gletter * "  " * eletter)
+
     params = String[]
 
     for i in 1:numCFs
