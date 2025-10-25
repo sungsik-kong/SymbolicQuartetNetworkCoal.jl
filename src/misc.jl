@@ -180,9 +180,8 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
     numCFs = size(df, 1)
     
     # define letters to be used
-    gletter = SymbolicQuartetNetworkCoal.gLab[1]
-    eletter = SymbolicQuartetNetworkCoal.eLab[1]
-    println("g and e letters: " * gletter * "  " * eletter)
+    gletter = gLab[1]
+    eletter = eLab[1]
 
     params = String[]
 
@@ -192,20 +191,25 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
         expressions = String[]
 
         for e in 1:edgenumber
-            if occursin("-t_{$e}", df[i, 2])
+            # if occursin("-t_{$e}", df[i, 2])
+            if occursin("-"*eletter*"_{$e}", df[i, 2])
                 push!(expressions, "X$e")
             end
         end
 
         for e in 1:retnumber
-            if occursin("r_{$e}", df[i, 2])
-                push!(expressions, "R$e")
+            # if occursin("r_{$e}", df[i, 2])
+            if occursin(gletter*"_{$e}", df[i, 2])
+                push!(expressions, uppercase(gletter)*"$e")
             end
         end    
 
         append!(params, expressions)
     end
     params = unique(params)
+
+    # ESA
+    # println(params)
 
     # Replace symbolic expressions in CF equations
     for cf in 1:numCFs
@@ -276,7 +280,9 @@ function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::B
         error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
       end
       for (k, eNum) in enumerate(incoming)
-        label = k == 1 ? "γ = " * rLab*"{$j}" : "1-γ = " * "1 - "*rLab*"{$j}"
+        # ESA
+        # label = k == 1 ? "γ = " * rLab*"{$j}" : "1-γ = " * "1 - "*rLab*"{$j}"
+        label = k == 1 ? "γ = " * gLab*"{$j}" : "1-γ = " * "1 - "*gLab*"{$j}"
         push!(gamma_df, (number = eNum, label = label))      
       end
     end

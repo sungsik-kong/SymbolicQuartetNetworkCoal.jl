@@ -21,7 +21,9 @@ function network_expectedCF_formulas(net::HybridNetwork;
         for (k, e) in enumerate(incoming)
             e.gamma = round(e.gamma, digits=dpoints)
             #synth_e_dict[e.gamma] = k == 1 ? "$rLab{$j}" : "(1-$rLab{$j})"
-            synth_e_dict[(PN.getparent(e).number, PN.getchild(e).number, e.gamma)] = k == 1 ? "$rLab{$j}" : "(1-$rLab{$j})"            
+            # ESA now changing to gLab
+            # synth_e_dict[(PN.getparent(e).number, PN.getchild(e).number, e.gamma)] = k == 1 ? "$rLab{$j}" : "(1-$rLab{$j})" 
+            synth_e_dict[(PN.getparent(e).number, PN.getchild(e).number, e.gamma)] = k == 1 ? "$gLab{$j}" : "(1-$gLab{$j})"            
         end
     end
     
