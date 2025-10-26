@@ -199,6 +199,7 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
         for e in 1:retnumber
             # if occursin("r_{$e}", df[i, 2])
+            println(gletter)
             if occursin(gletter*"_{$e}", df[i, 2])
                 push!(expressions, uppercase(gletter)*"$e")
             end
@@ -209,13 +210,18 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
     params = unique(params)
 
     # ESA
-    # println(params)
+    println(params)
+
+    # ESA need to update this!
 
     # Replace symbolic expressions in CF equations
     for cf in 1:numCFs
         df[cf, 2] = replace(df[cf, 2], "r_{" => "R")   # Replace hybrid parameter notation
         df[cf, 2] = replace(df[cf, 2], "exp(-t_{" => "(X")  # Replace exponential notation
         df[cf, 2] = replace(df[cf, 2], "-t_{" => "*X")  # Replace edge length notation
+        # df[cf, 2] = replace(df[cf, 2], gletter *"_{" => uppercase(gletter))   # Replace hybrid parameter notation
+        # df[cf, 2] = replace(df[cf, 2], "exp(-"*eletter*"_{" => "(X")  # Replace exponential notation
+        # df[cf, 2] = replace(df[cf, 2], "-"*eletter*"_{" => "*X")  # Replace edge length notation 
         df[cf, 2] = replace(df[cf, 2], "})" => ")")     # Close parentheses
         df[cf, 2] = replace(df[cf, 2], "}" => "")       # Remove extra braces
     end
