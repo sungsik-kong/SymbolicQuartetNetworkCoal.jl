@@ -47,7 +47,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
     numq=binomial(ntax,4)
     quartet = Vector{PN.QuartetT{qtype}}(undef, numq)
     ts = [1,2,3,4]
-    # ESA get taxon sets
+    # get taxon sets
     for qi in 1:numq
         quartet[qi] = PN.QuartetT(qi, SVector{4}(ts), MVector(0.,0.,0.))
         # next: find the 4-taxon set with the next rank,
@@ -168,7 +168,6 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     # find and delete degree-2 blobs along external edges
     bcc = biconnectedComponents(net, true) # true: ignore trivial blobs
     entry = PN.biconnectedcomponent_entrynodes(net, bcc)
-    # ESA taking a guess here
     # entryindex = indexin(entry, net.nodes_changed)
     entryindex = indexin(entry, net.vec_node)
     exitnodes = PN.biconnectedcomponent_exitnodes(net, bcc, false) # don't redo the preordering
@@ -197,7 +196,6 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
     if net.numhybrids > 0
         preorder!(net)
         # find a lowest hybrid node and # of taxa below it
-        # ESA
         # hyb = net.nodes_changed[findlast(n -> n.hybrid, net.nodes_changed)]
         hyb = net.vec_node[findlast(n -> n.hybrid, net.vec_node)]
         funneledge = [e for e in hyb.edge if PhyloNetworks.getparent(e) === hyb]

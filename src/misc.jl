@@ -178,7 +178,7 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
     edgenumber = length(net.edge)
     retnumber = length(net.hybrid)
     numCFs = size(df, 1)
-    
+
     # define letters to be used
     gletter = gLab[1]
     eletter = eLab[1]
@@ -199,7 +199,6 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
         for e in 1:retnumber
             # if occursin("r_{$e}", df[i, 2])
-            println(gletter)
             if occursin(gletter*"_{$e}", df[i, 2])
                 push!(expressions, uppercase(gletter)*"$e")
             end
@@ -209,19 +208,14 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
     end
     params = unique(params)
 
-    # ESA
-    println(params)
-
-    # ESA need to update this!
-
     # Replace symbolic expressions in CF equations
     for cf in 1:numCFs
-        df[cf, 2] = replace(df[cf, 2], "r_{" => "R")   # Replace hybrid parameter notation
-        df[cf, 2] = replace(df[cf, 2], "exp(-t_{" => "(X")  # Replace exponential notation
-        df[cf, 2] = replace(df[cf, 2], "-t_{" => "*X")  # Replace edge length notation
-        # df[cf, 2] = replace(df[cf, 2], gletter *"_{" => uppercase(gletter))   # Replace hybrid parameter notation
-        # df[cf, 2] = replace(df[cf, 2], "exp(-"*eletter*"_{" => "(X")  # Replace exponential notation
-        # df[cf, 2] = replace(df[cf, 2], "-"*eletter*"_{" => "*X")  # Replace edge length notation 
+        # df[cf, 2] = replace(df[cf, 2], "r_{" => "R")   # Replace hybrid parameter notation
+        # df[cf, 2] = replace(df[cf, 2], "exp(-t_{" => "(X")  # Replace exponential notation
+        # df[cf, 2] = replace(df[cf, 2], "-t_{" => "*X")  # Replace edge length notation
+        df[cf, 2] = replace(df[cf, 2], gletter *"_{" => uppercase(gletter))   # Replace hybrid parameter notation
+        df[cf, 2] = replace(df[cf, 2], "exp(-"*eletter*"_{" => "(X")  # Replace exponential notation
+        df[cf, 2] = replace(df[cf, 2], "-"*eletter*"_{" => "*X")  # Replace edge length notation 
         df[cf, 2] = replace(df[cf, 2], "})" => ")")     # Close parentheses
         df[cf, 2] = replace(df[cf, 2], "}" => "")       # Remove extra braces
     end
@@ -286,7 +280,6 @@ function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::B
         error("Hybrid node $hybNode has $(length(incoming)) incoming edges (expected 2).")
       end
       for (k, eNum) in enumerate(incoming)
-        # ESA
         # label = k == 1 ? "γ = " * rLab*"{$j}" : "1-γ = " * "1 - "*rLab*"{$j}"
         label = k == 1 ? "γ = " * gLab*"{$j}" : "1-γ = " * "1 - "*gLab*"{$j}"
         push!(gamma_df, (number = eNum, label = label))      
