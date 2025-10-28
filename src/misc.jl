@@ -225,7 +225,7 @@ end
 
 
 """
-    makeEdgeLabel_v3(net::HybridNetwork; showTerminalEdgeLabels::Bool=false)
+    makeEdgeLabel(net::HybridNetwork; showTerminalEdgeLabels::Bool=false)
 
 Generates a dataframe mapping edge numbers to their symbolic labels.
 
@@ -319,7 +319,7 @@ end
 
 
 """
-    makeEdgeLabel(net; showTerminalEdgeLabels=false)
+    makeEdgeLabel_OLD(net; showTerminalEdgeLabels=false)
 
 Generates a dataframe mapping edge numbers to their symbolic labels.
 

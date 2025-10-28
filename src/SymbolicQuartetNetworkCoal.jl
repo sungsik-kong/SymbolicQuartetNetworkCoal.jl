@@ -17,7 +17,7 @@ export_csv,
 format_export,
 readTopologyrand,
 network_expectedCF_formulas,
-makeEdgeLabel_v3,
+# makeEdgeLabel_v3,
 makeEdgeLabel,
 assignBinaryEdgeLengths
 
