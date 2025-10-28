@@ -1,5 +1,6 @@
 function export_csv(df; filename="symCF_output"::String)
-    CSV.write("$filename.csv",df,header=false)
+    df_clean=deepcopy(cleanLabels(df))
+    CSV.write("$filename.csv",df_clean,header=false)
 end
 
 """
@@ -101,7 +102,7 @@ function export_symbolic_format(net, df;
     
     if(multigraded)
         #filename*="_macaulay"
-        open("$filename.im.m2.txt", "w") do file
+        open("$(filename)_im.m2", "w") do file
             str="needsPackage \"MultigradedImplicitization\"\n"
             str*="R = QQ["
             for par in params str=str*par*"," end
