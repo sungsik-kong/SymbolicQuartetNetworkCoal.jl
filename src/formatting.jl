@@ -1,5 +1,5 @@
 function export_csv(df; filename="symCF_output"::String)
-    df_clean=deepcopy(cleanLabels(df))
+    df_clean=cleanLabels(deepcopy(df))
     CSV.write("$filename.csv",df_clean,header=false)
 end
 
@@ -14,8 +14,9 @@ end
             singular=false::Bool
             )
 
-# Format symbolic CF formulas for use in Macaulay, Matlab, and Singular
-
+# Description
+- Print symbolic CFs to csv file. (default)
+- Format symbolic CF formulas for use in Macaulay, Matlab, and Singular.
 """
 function export_symbolic_format(net, df;
     inheritancecorrelation=0.0::Float64,
@@ -32,6 +33,7 @@ function export_symbolic_format(net, df;
     #macaulay output
     numCFs=size(df)[1]
     dataframe=deepcopy(df)
+    println(dataframe[[1,2],:])
     
     params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
     
@@ -42,8 +44,9 @@ function export_symbolic_format(net, df;
     end
     
     if(macaulay)
-        filename1=filename*"_macaulay"
-        open("$filename1.m2", "w") do file
+        filename1=filename*"_macaulay.m2"
+        println(filename1)
+        open(filename1, "w") do file
             str="R = QQ["
             for par in params str=str*par*"," end
             str=str*"C_1..C_$numCFs]\n"
