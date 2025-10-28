@@ -33,7 +33,6 @@ function export_symbolic_format(net, df;
     #macaulay output
     numCFs=size(df)[1]
     dataframe=deepcopy(df)
-    println(dataframe[[1,2],:])
     
     params=gettingSymbolicInput(net, dataframe, inheritancecorrelation) 
     
@@ -45,7 +44,6 @@ function export_symbolic_format(net, df;
     
     if(macaulay)
         filename1=filename*"_macaulay.m2"
-        println(filename1)
         open(filename1, "w") do file
             str="R = QQ["
             for par in params str=str*par*"," end

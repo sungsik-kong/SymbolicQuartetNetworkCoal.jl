@@ -349,7 +349,7 @@ function makeEdgeLabel_OLD(net; showTerminalEdgeLabels=false)
     return df
 end
 
-function sqnc_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false)
+function symCF_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false)
     rootnode = getroot(net)
     # caution: the root and its incident edges may change when degree-2 nodes
     #          are removed. Indices of nodes to be removed would change too.

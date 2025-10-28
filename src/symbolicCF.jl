@@ -110,7 +110,7 @@ function network_expectedCF!(quartet::PN.QuartetT{MVector{3,Float64}},
     qCFp=String["","",""] 
     
     net = deepcopy(net)
-    sqnc_removedegree2nodes!(net, synth_e_dict)
+    symCF_removedegree2nodes!(net, synth_e_dict)
     
     # delete all taxa except for the 4 in the quartet
     for taxon in taxa
