@@ -3,7 +3,7 @@ function export_csv(df; filename="symCF_output"::String)
 end
 
 """
-        function format_export(net, df;
+        function export_symbolic_format(net, df;
             inheritancecorrelation=0.0::Float64,
             filename="symCF_output"::String,
             csv=true::Bool,
@@ -16,7 +16,7 @@ end
 # Format symbolic CF formulas for use in Macaulay, Matlab, and Singular
 
 """
-function format_export(net, df;
+function export_symbolic_format(net, df;
     inheritancecorrelation=0.0::Float64,
     filename="symCF_output"::String,
     csv=true::Bool,

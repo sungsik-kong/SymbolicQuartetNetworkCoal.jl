@@ -14,7 +14,7 @@ const PN = PhyloNetworks
 export
 aloha,
 export_csv,
-format_export,
+export_symbolic_format,
 readTopologyrand,
 network_expectedCF_formulas,
 # makeEdgeLabel_v3,

@@ -248,7 +248,7 @@ This function is only used for pretty plotting of the network with PhyloPlots.
   - `number`: Edge numbers.
   - `label`: Corresponding symbolic labels (`"t1, γ = g1"`).
 """
-function makeEdgeLabel_v3(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::Bool=false)
+function makeEdgeLabel(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::Bool=false)
   
   # get internal edge numbers unless want all edges labeled
   edge_numbers_to_include = [e.number for e in net.edge if !PhyloNetworks.getchild(e).leaf || showAllEdgeLabels]
@@ -340,7 +340,7 @@ Setting `showTerminalEdgeLabels=true` includes labels for terminal edges as well
   - `number`: Edge numbers.
   - `label`: Corresponding symbolic labels (`"t_{e}"`).
 """
-function makeEdgeLabel(net; showTerminalEdgeLabels=false)
+function makeEdgeLabel_OLD(net; showTerminalEdgeLabels=false)
     edges_to_include = [e for e in net.edge if !PhyloNetworks.getchild(e).leaf || showTerminalEdgeLabels]
     df = DataFrame(
         number = [e.number for e in edges_to_include],
