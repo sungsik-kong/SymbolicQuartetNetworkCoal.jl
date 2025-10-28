@@ -9,13 +9,12 @@ import Random
 const dpoints=10 # decimal points for all parameters when randomly generated
 const eLab="t_"
 const gLab="g_"
-const rLab="r_"
 const PN = PhyloNetworks
 
 export
 aloha,
 export_csv,
-reformat_export,
+format_export,
 readTopologyrand,
 network_expectedCF_formulas,
 makeEdgeLabel_v3,
@@ -23,7 +22,7 @@ makeEdgeLabel,
 assignBinaryEdgeLengths
 
 include("misc.jl")
-include("symbolicQNC.jl")
-include("reformatting.jl")    
+include("symbolicCF.jl")
+include("formatting.jl")    
 
 end # module
