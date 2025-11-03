@@ -40,7 +40,7 @@ function network_expectedCF_formulas(net::HybridNetwork;
     all(e.gamma >= 0.0 for e in net.edge) || error("some γ's are missing for hybrid edges: can't calculate expected CFs.")
     inheritancecorrelation >= 0 || error("the inheritance correlation should be non-negative")
     inheritancecorrelation <= 1 || error("the inheritance correlation should be <= 1")
-    taxa = sort!(tipLabels(net))
+    taxa = sort!(tiplabels(net))
     taxonnumber = Dict(taxa[i] => i for i in eachindex(taxa))
     ntax = length(taxa)
     qtype = MVector{3,Float64} # 3 floats: CF12_34, CF13_24, CF14_23; initialized at 0.0
@@ -166,7 +166,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         Qfuseedgesat!(net.rooti, net,synth_e_dict)
     end
     # find and delete degree-2 blobs along external edges
-    bcc = biconnectedComponents(net, true) # true: ignore trivial blobs
+    bcc = biconnectedcomponents(net, true) # true: ignore trivial blobs
     entry = PN.biconnectedcomponent_entrynodes(net, bcc)
     # entryindex = indexin(entry, net.nodes_changed)
     entryindex = indexin(entry, net.vec_node)
@@ -224,7 +224,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
             enumber=e.number
             cut_edges_pa=PN.getparent(e).number
             cut_edges_ch=PN.getchild(e).number
-            hwc = hardwiredCluster(e, fourtaxa)
+            hwc = hardwiredcluster(e, fourtaxa)
             sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
         end
         minorcf = exp(-internallength)/3
@@ -289,7 +289,7 @@ function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorr
         else
             oneminusrhop="(1-$inheritancecorrelation)"
         end
-        hwc = hardwiredCluster(parenthedge[1], fourtaxa)
+        hwc = hardwiredcluster(parenthedge[1], fourtaxa)
         sistertofirst = findnext(x -> x == hwc[1], hwc, 2)
         internallength = ( ispolytomy ? 0.0 : funneledge[1].length)
         deepcoalprob = exp(-internallength)
