@@ -1,3 +1,27 @@
+"""
+    network_expectedCF_formulas(net::HybridNetwork;
+        showprogressbar=false,
+        inheritancecorrelation=0,
+        symbolic=false)
+
+This is the main function of **symCF**. This function iterates over *all* quartets of taxa in `net` and
+generates the symbolic and numerical formulas that compute **expected quartet concordance factors (CFs)** 
+under the **network multispecies coalescent**.
+
+# Mandatory argument
+- `net::HybridNetwork`  
+  A rooted/unrooted phylogenetic network (parsed in *HybridNetwork* object) with all parameters (edge lengths and inheritance probabilities).
+
+# Keyword Arguments
+- `showprogressbar::Bool=false`  
+  Whether to print progress while computing CFs.
+
+- `inheritancecorrelation::Float64=0`  
+  The inheritance correlation parameter ρ. Must be in `[0,1]`.
+
+- `symbolic::Bool=false`  
+  Returns numerical expressions for each CF. If `true`, returns symbolic expressions.  
+"""
 function network_expectedCF_formulas(net::HybridNetwork; 
     showprogressbar=false, 
     inheritancecorrelation=0, 
