@@ -159,6 +159,8 @@ For `inheritancecorrelation` see [`network_expectedCF`](@ref).
 Its value should be between 0 and 1 (not checked by this internal function).
 """
 function network_expectedCF_4taxa!(net::HybridNetwork, fourtaxa, inheritancecorrelation, qCFp, symbolic,synth_e_dict)
+    #((((b:1.0,(a:1.0,e:1.0):1.0):1.0,(((c:1.0,d:1.0):1.0)#H5:1.0::0.5)#H4:1.0::0.5):1.0,#H4:1.0::0.5):1.0,#H5:1.0::0.5);
+    #println(PhyloNetworks.writenewick(net))
     qCFp .*= "("         
     deleteaboveLSA!(net)
     # make sure the root is of degree 3+
