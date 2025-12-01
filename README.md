@@ -43,12 +43,13 @@ julia> aloha()
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ 
                    Hawai'i-Five-O  
 ```
-If you see the Hawaiian "shaka" hand gesture, relax and take it easy, because your SymbolicQuartetNetworkCoal.jl is installed correctly.-->
+If you see the Hawaiian "shaka" hand gesture, relax and take it easy, because your SymbolicQuartetNetworkCoal.jl is installed correctly.
 
 
 ## Input and output
   - **Input**: A tree/network topology (with four or more taxa) in Newick/extended Newick format, respectively, with or without parameters (edge lengths and inheritance probabilities) specified.
   - **Output**: Numerical or symbolic formulas to compute concordance factors (CFs) under the network multispecies coalescent for each quartet topology extracted from the input. Optional transformation of those formulas is also available for interoperability with other mathematical tools like Macaulay2 or Matlab. 
+
 
 ## Main functions
 ### Assign arbitrary parameter values to input topology
@@ -189,6 +190,9 @@ On your terminal you can run the `.m2` output using a line similar to the one be
 ```
 m2 < sqnc_output_macaulay.m2 > out.txt
 ```
+
+-->
+
 ## Citation
 
 
