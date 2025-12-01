@@ -1,6 +1,6 @@
 # SymbolicQuartetNetworkCoal.jl
 
-See [`Wiki`](https://github.com/sungsik-kong/SymbolicQuartetNetworkCoal.jl/wiki) for detailed information on `SymbolicQuartetNetworkCoal.jl`.
+See this [`Wiki`](https://github.com/sungsik-kong/SymbolicQuartetNetworkCoal.jl/wiki) page for detailed information on `SymbolicQuartetNetworkCoal.jl`.
 
 <!--Aloha!
 
