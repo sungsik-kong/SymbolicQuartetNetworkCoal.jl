@@ -16,7 +16,7 @@ or-->
 ```@julia
 julia> using Pkg; Pkg.add("SymbolicQuartetNetworkCoal")
 ```
-To make sure the package is installed correctly, try the following:
+<!--To make sure the package is installed correctly, try the following:
 ```@julia
 julia> using SymbolicQuartetNetworkCoal
 
@@ -41,7 +41,7 @@ julia> aloha()
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠛⠛⠁⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀ 
                    Hawai'i-Five-O  
 ```
-If you see the Hawaiian "shaka" hand gesture, relax and take it easy, because your SymbolicQuartetNetworkCoal.jl is installed correctly.
+If you see the Hawaiian "shaka" hand gesture, relax and take it easy, because your SymbolicQuartetNetworkCoal.jl is installed correctly.-->
 
 
 ## Input and output
