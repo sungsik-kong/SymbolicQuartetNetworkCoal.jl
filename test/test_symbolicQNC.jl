@@ -2,15 +2,14 @@
 const eLab="t_"
 const rLab="g_"
 const dpoints=10
+const threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
+const ih=0.1 #inheritancecorrelation
+const filename=["topologies_n5_l1.txt","topologies_n5_l2.txt"]#,"sim_nets.txt"]
+const numrepeats=2
 
-for rep in 1:1
-    
+for rep in 1:numrepeats
     @testset begin
-        threshold=0.0000000001 #we want the absolute difference between the true and computed values to be <threshold
-        ih=0.1 #inheritancecorrelation
-        filename=["topologies_n5_l1.txt","topologies_n5_l2.txt"]#,"sim_nets.txt"]
         count1=0
-
         function parameterDictionary1REV(testnet, ih)
             revdict = Dict()
             
