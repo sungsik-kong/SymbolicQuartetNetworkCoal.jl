@@ -1,8 +1,10 @@
 # SymbolicQuartetNetworkCoal.jl
 
-Aloha!
+See [`Pkg Wiki`](https://github.com/sungsik-kong/SymbolicQuartetNetworkCoal.jl/wiki) for detailed information on `SymbolicQuartetNetworkCoal.jl`.
 
-`SymbolicQuartetNetworkCoal.jl` or simply "SymCF" is a Julia package that provides useful functions for studying mathematical identifiability of phylogenetic tree and network parameters using quartet concordance factors with techniques from algebraic statistics. This package is constructed by extending another Julia package `QuartetNetworkGoodnessFit` (available at https://github.com/JuliaPhylo/QuartetNetworkGoodnessFit.jl).
+<!--Aloha!
+
+`SymbolicQuartetNetworkCoal.jl` or simply "SymCF" is a Julia package that provides useful functions for studying mathematical identifiability of phylogenetic tree and network parameters using quartet concordance factors with techniques from algebraic statistics. This package is constructed by extending another Julia package `QuartetNetworkGoodnessFit` (available at https://github.com/JuliaPhylo/QuartetNetworkGoodnessFit.jl).-->
 
 ## Installation
 
