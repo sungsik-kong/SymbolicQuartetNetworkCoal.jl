@@ -2,7 +2,6 @@ module SymbolicQuartetNetworkCoal
 
     using CSV
     using DataFrames
-    #using Dates
     using PhyloNetworks
     using StaticArrays
     import Random
