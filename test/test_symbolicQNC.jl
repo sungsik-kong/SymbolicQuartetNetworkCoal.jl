@@ -10,38 +10,29 @@ const numrepeats=2
 for rep in 1:numrepeats
     @testset begin
         count1=0
-        function parameterDictionary1REV(testnet, ih)
-            revdict = Dict()
-            
-            for e in testnet.edge 
-                revdict["$eLab{$(e.number)}"] = e.length
-            end
-            # Dictionary for inheritance probabilities (γ)
-            hybridNodeNumbers = [n.number for n in testnet.node if n.hybrid]
-            for j in 1:testnet.numhybrids
-                hybNode = hybridNodeNumbers[j]
-                visitCount = 1
-                for e in testnet.edge
-                    if PhyloNetworks.getchild(e).number == hybNode
-                        e.gamma = round(e.gamma, digits=dpoints)
-                        if visitCount == 1
-                            revdict["$rLab{$j}"] = e.gamma
-                            visitCount += 1
-                        elseif visitCount == 2
-                            revdict["(1-$rLab{$j})"] = e.gamma
-                        else
-                            error("Hybrid node $(hybNode) has more than 2 incoming edges.")
-                        end
-                    end
-                end
+        function parameterDictionary(testnet, ih)
+            revdict = Dict(
+                "&rho" => ih,
+                "1-&rho" => round(1 - ih, digits=dpoints)
+            )
+
+            # Edge lengths
+            for e in testnet.edge
+                revdict["$(eLab){$(e.number)}"] = e.length
             end
 
-            # Inheritance correlation (ρ)
-            revdict["&rho"] = ih
-            revdict["1-&rho"] = round(1 - ih, digits=dpoints)
-            
+            # Hybrid nodes γ
+            hybridNodes = [n.number for n in testnet.node if n.hybrid]
+            for (j, hybNode) in enumerate(hybridNodes)
+                edges_to_hybrid = [e for e in testnet.edge if PhyloNetworks.getchild(e).number == hybNode]
+                @assert length(edges_to_hybrid) == 2 "Hybrid node $hybNode should have exactly 2 incoming edges"
+                revdict["$(rLab){$j}"] = round(edges_to_hybrid[1].gamma, digits=dpoints)
+                revdict["(1-$(rLab){$j})"] = round(edges_to_hybrid[2].gamma, digits=dpoints)
+            end
+
             return revdict
         end
+
 
         for afile in filename
             count1+=1
@@ -57,17 +48,17 @@ for rep in 1:numrepeats
                     
                     testnet=SymbolicQuartetNetworkCoal.readTopologyrand(i)
 
-    if rep==1
-        for e in testnet.edge
-            e.length=1.0
-            if e.hybrid
-                e.gamma=0.5
-            end
-        end
-    end
+                    if rep==1
+                        for e in testnet.edge
+                            e.length=1.0
+                            if e.hybrid
+                                e.gamma=0.5
+                            end
+                        end
+                    end
                     println("Network in $afile [$count]: $(PhyloNetworks.writenewick(testnet))")
 
-                    revdict=parameterDictionary1REV(testnet,ih)                    
+                    revdict=parameterDictionary(testnet,ih)                    
 
                     #compute true CFs and numeric formulas
                     Q0,T0,df_num=SymbolicQuartetNetworkCoal.network_expectedCF_formulas(testnet,symbolic=false,inheritancecorrelation=ih)
