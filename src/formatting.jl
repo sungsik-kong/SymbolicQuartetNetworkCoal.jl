@@ -8,7 +8,7 @@ end
             inheritancecorrelation=0.0::Float64,
             filename="symCF_output"::String,
             csv=true::Bool,
-            macaulay=false::Bool,
+            macaulay2=false::Bool,
             matlab=false::Bool,
             multigraded=false::Bool,
             singular=false::Bool
@@ -16,13 +16,13 @@ end
 
 # Description
 - Print symbolic CFs to csv file. (default)
-- Format symbolic CF formulas for use in Macaulay, Matlab, and Singular.
+- Format symbolic CF formulas for use in macaulay2, Matlab, and Singular.
 """
 function export_symbolic_format(net, df;
     inheritancecorrelation=0.0::Float64,
     filename="symCF_output"::String,
     csv=true::Bool,
-    macaulay=false::Bool,
+    macaulay2=false::Bool,
     matlab=false::Bool,
     multigraded=false::Bool,
     singular=false::Bool
@@ -30,7 +30,7 @@ function export_symbolic_format(net, df;
     
     if(csv) export_csv(df; filename=filename) end
     
-    #macaulay output
+    #macaulay2 output
     numCFs=size(df)[1]
     dataframe=deepcopy(df)
     
@@ -42,8 +42,8 @@ function export_symbolic_format(net, df;
         return "($rational)"
     end
     
-    if(macaulay)
-        filename1=filename*"_macaulay.m2"
+    if(macaulay2)
+        filename1=filename*"_macaulay2.m2"
         open(filename1, "w") do file
             str="R = QQ["
             for par in params str=str*par*"," end
