@@ -3,6 +3,7 @@ module SymbolicQuartetNetworkCoal
     using CSV
     using DataFrames
     using PhyloNetworks
+    export readnewick
     using StaticArrays
     import Random
 
