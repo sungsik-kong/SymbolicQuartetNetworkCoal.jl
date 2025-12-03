@@ -175,7 +175,8 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 # 27
 # 28
 # so 1:edgenumber does not work.  It's also sort of a problem for the strings.
-    edgenumber = length(net.edge)
+    #edgenumber = length(net.edge)
+    edgenumbers = [e.number for e in net.edge]
     retnumber = length(net.hybrid)
     numCFs = size(df, 1)
 
@@ -187,10 +188,10 @@ function gettingSymbolicInput(net::HybridNetwork, df, inheritancecorrelation)
 
     for i in 1:numCFs
         df[i, 2] = replace(df[i, 2], "rho" => "$inheritancecorrelation")
-        record = false
         expressions = String[]
 
-        for e in 1:edgenumber
+        #for e in 1:edgenumber
+        for e in edgenumbers
             # if occursin("-t_{$e}", df[i, 2])
             if occursin("-"*eletter*"_{$e}", df[i, 2])
                 push!(expressions, "X$e")
