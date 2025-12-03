@@ -14,11 +14,11 @@ module SymbolicQuartetNetworkCoal
 
     export
     aloha,
-    export_csv,
-    export_symbolic_format,
+    export_csv, 
+    export_symbolic_format, 
     readTopologyrand,
-    network_expectedCF_formulas,
-    makeEdgeLabel,
+    network_expectedCF_formulas, 
+    makeEdgeLabel, 
     assignBinaryEdgeLengths
 
     include("misc.jl")
