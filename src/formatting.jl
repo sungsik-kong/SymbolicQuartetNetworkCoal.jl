@@ -74,10 +74,13 @@ function export_symbolic_format(net, df;
         #str*="Write Matlab file: "
         #str*=(matlab ? "on\n" : "off\n")
         open("$filename1.m", "w") do file 
-            str="% Declare variables\n"
+            str="clc\n"
+            str=str*"% Declare variables\n"
             str=str*"syms "
             for par in params str=str*par*" " end
             for i in 1:numCFs str=str*"C$i " end
+            str=str*"\n\n%%% Got \"Unrecognized function or variable 'syms'\" error msg? Uncomment the next line to fix it\n"
+            str=str*"% restoredefaultpath"
             str=str*"\n\n% matrix of generating polynomials\n"
             str=str*"F=["
             i=1
@@ -90,13 +93,26 @@ function export_symbolic_format(net, df;
             str1=(dataframe[numCFs,2])
             str1=replace(str1,string(inheritancecorrelation)=>rationalize(inheritancecorrelation))            
             str=str*"$(str1)-C$numCFs];\n"
-            str=str*"\n% matrix of generating polynomials\n"
+#            str=str*"\n% matrix of generating polynomials\n"
             str=str*"\n% Array of all variables\n"
             str=str*"V=["
             for par in params str=str*par*" " end
             for i in 1:numCFs-1 str=str*"C$i " end
             str=str*"C$numCFs]\n"
             str=str*"\n% Compute dimension\nCoalDim(F,V)"
+            str=str*"\n
+%% The function that numerically computes the dimension of the variety defined by our CF parametriztion
+function CoalDim(c, d)
+    n_equations = length(c); % number of equations (or number of C's in the ideal)
+    n_parameters = length(d) - n_equations;% number of parameters in X's and R's
+    a = n_parameters;
+    b = n_equations;
+    JF = jacobian(c, d);
+    B = [zeros(b,a) -eye(b)];
+    rk = rank([JF; B]); % nxn that varnish (Check)
+    sz = size([JF; B]); % The size function returns the dimensions of an array (we take the second entry)
+    \"The dimension of the variety is \" + string(a - (sz(2) - rk))
+end"
             write(file, str)
         end
     end
