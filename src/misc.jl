@@ -317,39 +317,6 @@ function makeEdgeLabel(net::PhyloNetworks.HybridNetwork; showAllEdgeLabels::Bool
   return df
 end
 
-
-
-"""
-    makeEdgeLabel_OLD(net; showTerminalEdgeLabels=false)
-
-Generates a dataframe mapping edge numbers to their symbolic labels.
-
-## Description
-This function creates labels for the edges of a `HybridNetwork` in the format `"t_{e}"`, where `e` is the edge number.  
-By default, labels are only assigned to **non-terminal edges** (i.e., edges that do not end at leaf nodes).  
-The output dataframe is used as input for PhyloPlots' option `edgelabel=``.
-Setting `showTerminalEdgeLabels=true` includes labels for terminal edges as well.
-
-## Arguments
-- `net`: A `HybridNetwork` object.
-- `showTerminalEdgeLabels`: A boolean flag (default = `false`).  
-   - `false`: Excludes terminal edges.  
-   - `true`: Includes all edges.  
-
-## Returns
-- A `DataFrame` with columns:
-  - `number`: Edge numbers.
-  - `label`: Corresponding symbolic labels (`"t_{e}"`).
-"""
-function makeEdgeLabel_OLD(net; showTerminalEdgeLabels=false)
-    edges_to_include = [e for e in net.edge if !PhyloNetworks.getchild(e).leaf || showTerminalEdgeLabels]
-    df = DataFrame(
-        number = [e.number for e in edges_to_include],
-        label = ["t_{$(e.number)}" for e in edges_to_include]
-    )
-    return df
-end
-
 function symCF_removedegree2nodes!(net::HybridNetwork, dict, keeproot::Bool=false)
     rootnode = getroot(net)
     # caution: the root and its incident edges may change when degree-2 nodes
