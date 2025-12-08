@@ -47,7 +47,7 @@ function export_symbolic_format(net, df;
         open(filename1, "w") do file
             str="R = QQ["
             for par in params str=str*par*"," end
-            str=str*"C_1..C_$numCFs]\n"
+            str=str*"C_1..C_$numCFs];\n"
             str=str*"I = ideal(\n"
             i=1
             while i<numCFs
@@ -62,8 +62,8 @@ function export_symbolic_format(net, df;
             str=str*"G = eliminate (I, {"
             numparams=length(params)   
             for par in 1:(length(params)-1) str=str*params[par]*"," end
-            str=str*"$(params[numparams])})\n"
-            str=str*"S = QQ[C_1..C_$numCFs]\nJ = sub(G,S)\ndim J"
+            str=str*"$(params[numparams])});\n"
+            str=str*"S = QQ[C_1..C_$numCFs];\n J = sub(G,S);\n dim J"
             write(file, str)
         end
     end
@@ -98,7 +98,7 @@ function export_symbolic_format(net, df;
             str=str*"V=["
             for par in params str=str*par*" " end
             for i in 1:numCFs-1 str=str*"C$i " end
-            str=str*"C$numCFs]\n"
+            str=str*"C$numCFs];\n"
             str=str*"\n% Compute dimension\nCoalDim(F,V)"
             str=str*"\n
 %% The function that numerically computes the dimension of the variety defined by our CF parametriztion
@@ -123,9 +123,9 @@ end"
             str="needsPackage \"MultigradedImplicitization\"\n"
             str*="R = QQ["
             for par in params str=str*par*"," end
-            str*="T]\n"
+            str*="T];\n"
             str*="S = QQ["
-            str=str*"C_0..C_$numCFs]\n"
+            str=str*"C_0..C_$numCFs];\n"
             str=str*"im = {\n"
             i=1
             while i<numCFs
@@ -139,9 +139,9 @@ end"
             str=str*"$(str1)};\n"
             
             str=str*"im = {T} | apply(im, f -> f * T);\n"
-            str=str*"phi = map(R, S, im)\n"
-            str=str*"d=1\n"
-            str=str*"I = time componentsOfKernel(d, phi)\n"
+            str=str*"phi = map(R, S, im);\n"
+            str=str*"d=1; --Change the value of d to get higher graded pieces of I\n"
+            str=str*"I = time componentsOfKernel(d, phi);\n"
             str=str*"L = flatten values I"
             
             write(file, str)
